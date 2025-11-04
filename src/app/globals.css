@@ -1,8 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Tailwind CSS v4 custom variant - Editor warning: This is valid in Tailwind v4 */
 @custom-variant dark (&:is(.dark *));
 
+/* Tailwind CSS v4 theme configuration - Editor warning: This is valid in Tailwind v4 */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -82,15 +84,18 @@
 
 @layer base {
   * {
+    /* Tailwind @apply directive - Editor warning: This is valid in Tailwind v4 */
     @apply border-border outline-ring/50;
   }
   body {
+    /* Tailwind @apply directive - Editor warning: This is valid in Tailwind v4 */
     @apply bg-background text-foreground;
   }
 
   /* Remove input arrows from number inputs globally */
   input[type="number"] {
     -moz-appearance: textfield;
+    appearance: textfield; /* Standard property for compatibility */
   }
 
   input[type="number"]::-webkit-outer-spin-button,
