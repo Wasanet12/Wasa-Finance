@@ -1,12 +1,41 @@
 import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
-import { auth } from "@clerk/nextjs/server";
+import { getAuth } from "firebase/admin";
+import { initializeApp, getApps } from "firebase-admin/app";
+
+// Initialize Firebase Admin if not already initialized
+if (!getApps().length) {
+  try {
+    initializeApp({
+      credential: {
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      },
+    });
+  } catch (error) {
+    console.error('Error initializing Firebase Admin:', error);
+  }
+}
 
 export async function POST(req: Request) {
-  const { userId } = await auth();
+  try {
+    const auth = getAuth();
+    const token = req.headers.get("authorization")?.replace("Bearer ", "");
 
-  if (!userId) {
-    return new Response("Unauthorized", { status: 401 });
+    if (!token) {
+      return new Response("Unauthorized: No token provided", { status: 401 });
+    }
+
+    const decodedToken = await auth.verifyIdToken(token);
+    const userId = decodedToken.uid;
+
+    if (!userId) {
+      return new Response("Unauthorized", { status: 401 });
+    }
+  } catch (error) {
+    console.error("Auth error:", error);
+    return new Response("Unauthorized: Invalid token", { status: 401 });
   }
 
   if (!process.env.OPENAI_API_KEY) {
