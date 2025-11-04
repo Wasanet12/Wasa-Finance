@@ -103,7 +103,7 @@ export default function DashboardLayout({
         </div>
 
         {/* Page Content */}
-        <div className="p-4 sm:p-6">
+        <div className="p-2 sm:p-3 md:p-4 lg:p-6">
           {children}
         </div>
       </main>
