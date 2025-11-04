@@ -662,7 +662,7 @@ export const reportService = {
    * Update report
    */
   update: async (id: string, report: Partial<Report>): Promise<ApiResponse<void>> => {
-    return updateDocument(CLECTIONS.REPORTS, id, report);
+    return updateDocument(COLLECTIONS.REPORTS, id, report);
   },
 
   /**
