@@ -1,0 +1,105 @@
+"use client";
+
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Customer } from '@/lib/types';
+import { services } from '@/lib/firestore';
+import { formatDate } from '@/utils/dateUtils';
+import { DollarSign } from 'lucide-react';
+
+interface MarkUnpaidFormProps {
+  customer: Customer;
+  onSuccess?: () => void;
+  trigger?: React.ReactNode;
+}
+
+export function MarkUnpaidForm({ customer, onSuccess, trigger }: MarkUnpaidFormProps) {
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const handleMarkAsUnpaid = async () => {
+    setLoading(true);
+    try {
+      // Update customer status to 'pending' (belum bayar)
+      const updateData: Partial<Customer> = {
+        status: 'pending',
+        paymentNotes: `Ditandai sebagai belum bayar pada ${formatDate(new Date())}`
+      };
+
+      const updateResult = await services.customer.update(customer.id, updateData);
+
+      if (updateResult.success) {
+        setOpen(false);
+        if (onSuccess) {
+          onSuccess();
+        }
+        console.log(`Customer ${customer.name} marked as unpaid successfully`);
+      } else {
+        console.error('Error marking customer as unpaid:', updateResult.error);
+        // You might want to show a toast notification here
+      }
+    } catch (error) {
+      console.error('Error marking customer as unpaid:', error);
+      // You might want to show a toast notification here
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const defaultTrigger = (
+    <Button
+      variant="outline"
+      size="sm"
+      title="Tandai sebagai Belum Bayar"
+      className="text-yellow-600 border-yellow-600 hover:bg-yellow-50"
+    >
+      <DollarSign className="h-4 w-4" />
+    </Button>
+  );
+
+  return (
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger asChild>
+        {trigger || defaultTrigger}
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            Tandai sebagai Belum Bayar
+          </AlertDialogTitle>
+        </AlertDialogHeader>
+        <div className="text-muted-foreground text-sm">
+          Apakah Anda yakin ingin menandai pelanggan <strong>{customer.name}</strong> sebagai "Belum Bayar"?
+          <br /><br />
+          Tindakan ini akan:
+          <ul className="list-disc list-inside mt-2 space-y-1">
+            <li>Mengubah status pelanggan menjadi "Pending"</li>
+            <li>Menampilkan pelanggan di halaman "Pelanggan Belum Bayar"</li>
+            <li>Memberikan kesempatan untuk memberikan diskon</li>
+          </ul>
+        </div>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={loading}>Batal</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleMarkAsUnpaid}
+            disabled={loading}
+            className="bg-yellow-600 hover:bg-yellow-700 text-white"
+          >
+            {loading ? 'Memproses...' : 'Ya, Tandai sebagai Belum Bayar'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}

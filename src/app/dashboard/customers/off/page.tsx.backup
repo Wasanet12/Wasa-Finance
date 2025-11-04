@@ -1,0 +1,155 @@
+"use client";
+
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getCustomersByStatus } from '@/lib/firebase/firestore';
+import { Customer } from '@/lib/firebase/firestore';
+import { PauseCircle } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+
+export default function OffCustomersPage() {
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchOffCustomers();
+  }, []);
+
+  const fetchOffCustomers = async () => {
+    try {
+      // Firebase uses "inactive" instead of "Off"
+      const customersData = await getCustomersByStatus('inactive');
+      setCustomers(customersData);
+    } catch (error) {
+      console.error('Error fetching off customers:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (timestamp: { toDate: () => Date } | undefined) => {
+    if (!timestamp) return '-';
+    return timestamp.toDate().toLocaleDateString('id-ID');
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#1B2336' }}></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center space-x-2">
+        <PauseCircle className="h-6 w-6" style={{ color: '#6B7280' }} />
+        <h1 className="text-3xl font-bold" style={{ color: '#1B2336' }}>Pelanggan Off</h1>
+      </div>
+
+      {/* Summary Card */}
+      <Card className="border-border" style={{ backgroundColor: '#1B2336' }}>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between" style={{ color: '#FFFFFF' }}>
+            <span>Ringkasan Pelanggan Off</span>
+            <Badge
+              style={{ backgroundColor: '#6B7280', color: '#FFFFFF' }}
+              className="px-2 py-1 text-xs"
+            >
+              {customers.length} Pelanggan
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="text-center">
+              <div className="text-2xl font-bold" style={{ color: '#FFFFFF' }}>{customers.length}</div>
+              <p className="text-sm" style={{ color: '#A0A8B8' }}>Total Pelanggan Off</p>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold" style={{ color: '#60A5FA' }}>
+                {customers.filter(c => c.paymentTarget === 'Wasa').length}
+              </div>
+              <p className="text-sm" style={{ color: '#A0A8B8' }}>Sebelumnya Bayar ke Wasa</p>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold" style={{ color: '#A78BFA' }}>
+                {customers.filter(c => c.paymentTarget === 'Kantor').length}
+              </div>
+              <p className="text-sm" style={{ color: '#A0A8B8' }}>Sebelumnya Bayar ke Kantor</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Customers Table */}
+      <Card className="border-border" style={{ backgroundColor: '#1B2336' }}>
+        <CardHeader>
+          <CardTitle style={{ color: '#FFFFFF' }}>Daftar Pelanggan Off</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border" style={{ borderColor: '#3D4558' }}>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead style={{ color: '#A0A8B8' }}>Nama</TableHead>
+                  <TableHead style={{ color: '#A0A8B8' }}>Email</TableHead>
+                  <TableHead style={{ color: '#A0A8B8' }}>Telepon</TableHead>
+                  <TableHead style={{ color: '#A0A8B8' }}>Paket Terakhir</TableHead>
+                  <TableHead style={{ color: '#A0A8B8' }}>Harga Terakhir</TableHead>
+                  <TableHead style={{ color: '#A0A8B8' }}>Tujuan Bayar</TableHead>
+                  <TableHead style={{ color: '#A0A8B8' }}>Tanggal Off</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {customers.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8" style={{ color: '#A0A8B8' }}>
+                      Tidak ada pelanggan dengan status Off.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  customers.map((customer) => (
+                    <TableRow key={customer.id} className="opacity-60">
+                      <TableCell className="font-medium" style={{ color: '#FFFFFF' }}>{customer.name}</TableCell>
+                      <TableCell style={{ color: '#FFFFFF' }}>{customer.email}</TableCell>
+                      <TableCell style={{ color: '#FFFFFF' }}>{customer.phone}</TableCell>
+                      <TableCell style={{ color: '#FFFFFF' }}>{customer.packageName}</TableCell>
+                      <TableCell className="line-through" style={{ color: '#FFFFFF' }}>
+                        {new Intl.NumberFormat('id-ID', {
+                          style: 'currency',
+                          currency: 'IDR',
+                          minimumFractionDigits: 0,
+                        }).format(customer.packagePrice)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          style={customer.paymentTarget === 'Wasa'
+                            ? { backgroundColor: '#60A5FA', color: '#FFFFFF' }
+                            : { backgroundColor: '#A78BFA', color: '#FFFFFF' }
+                          }
+                          className="px-2 py-1 text-xs"
+                        >
+                          {customer.paymentTarget}
+                        </Badge>
+                      </TableCell>
+                      <TableCell style={{ color: '#FFFFFF' }}>{formatDate(customer.updatedAt)}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

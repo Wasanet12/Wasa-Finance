@@ -1,0 +1,154 @@
+"use client";
+
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getCustomersByStatus } from '@/lib/firebase/firestore';
+import { Customer } from '@/lib/firebase/firestore';
+import { UserX, AlertTriangle, TrendingUp } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+
+export default function UnpaidCustomersPage() {
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUnpaidCustomers();
+  }, []);
+
+  const fetchUnpaidCustomers = async () => {
+    try {
+      // Since Firebase doesn't have "Belum Bayar" status, we'll show empty for now
+      // This page can be used when "Belum Bayar" status is added to Firebase
+      const customersData = await getCustomersByStatus('Belum Bayar');
+      setCustomers(customersData);
+    } catch (error) {
+      console.error('Error fetching unpaid customers:', error);
+      setCustomers([]); // Set empty array on error
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const formatDate = (timestamp: { toDate: () => Date } | undefined) => {
+    if (!timestamp) return '-';
+    return timestamp.toDate().toLocaleDateString('id-ID');
+  };
+
+  const totalPendingRevenue = customers.reduce((sum, customer) => sum + customer.packagePrice, 0);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#1B2336' }}></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center space-x-2">
+        <UserX className="h-6 w-6" style={{ color: '#1B2336' }} />
+        <h1 className="text-3xl font-bold" style={{ color: '#1B2336' }}>Pelanggan Belum Bayar</h1>
+      </div>
+
+      {/* Pending Revenue Summary */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="border-border" style={{ backgroundColor: '#1B2336' }}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium" style={{ color: '#FFFFFF' }}>
+              Total Pendapatan Tertunda
+            </CardTitle>
+            <AlertTriangle className="h-4 w-4" style={{ color: '#FFFFFF' }} />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold" style={{ color: '#FFFFFF' }}>
+              {formatCurrency(totalPendingRevenue)}
+            </div>
+            <p className="text-xs" style={{ color: '#FFFFFF' }}>
+              Dari {customers.length} pelanggan
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border" style={{ backgroundColor: '#1B2336' }}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium" style={{ color: '#FFFFFF' }}>
+              Potensi Laba Wasa
+            </CardTitle>
+            <TrendingUp className="h-4 w-4" style={{ color: '#FFFFFF' }} />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold" style={{ color: '#FFFFFF' }}>
+              {formatCurrency(totalPendingRevenue * 0.4)}
+            </div>
+            <p className="text-xs" style={{ color: '#FFFFFF' }}>
+              40% dari total pendapatan tertunda
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Customers Table */}
+      <Card className="border-border" style={{ backgroundColor: '#1B2336' }}>
+        <CardHeader>
+          <CardTitle style={{ color: '#FFFFFF' }}>Daftar Pelanggan Belum Bayar</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border" style={{ borderColor: '#3D4558' }}>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead style={{ color: '#FFFFFF' }}>Nama</TableHead>
+                  <TableHead style={{ color: '#FFFFFF' }}>Email</TableHead>
+                  <TableHead style={{ color: '#FFFFFF' }}>Telepon</TableHead>
+                  <TableHead style={{ color: '#FFFFFF' }}>Paket</TableHead>
+                  <TableHead style={{ color: '#FFFFFF' }}>Harga</TableHead>
+                  <TableHead style={{ color: '#FFFFFF' }}>Tujuan Bayar</TableHead>
+                  <TableHead style={{ color: '#FFFFFF' }}>Tanggal Daftar</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {customers.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8" style={{ color: '#FFFFFF' }}>
+                      Semua pelanggan sudah melakukan pembayaran.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  customers.map((customer) => (
+                    <TableRow key={customer.id}>
+                      <TableCell className="font-medium" style={{ color: '#FFFFFF' }}>{customer.name}</TableCell>
+                      <TableCell style={{ color: '#FFFFFF' }}>{customer.email}</TableCell>
+                      <TableCell style={{ color: '#FFFFFF' }}>{customer.phone}</TableCell>
+                      <TableCell style={{ color: '#FFFFFF' }}>{customer.packageName}</TableCell>
+                      <TableCell className="font-semibold" style={{ color: '#FFFFFF' }}>
+                        {formatCurrency(customer.packagePrice)}
+                      </TableCell>
+                      <TableCell style={{ color: '#FFFFFF' }}>{customer.paymentTarget}</TableCell>
+                      <TableCell style={{ color: '#FFFFFF' }}>{formatDate(customer.createdAt)}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
