@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { onAuthStateChanged } from '@/lib/auth';
+import { useAuth } from '@/components/auth-provider';
 import { Sidebar } from '@/components/wasa/sidebar';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,25 +13,22 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
 
+  // Redirect if not authenticated
   useEffect(() => {
-    onAuthStateChanged((state) => {
-      if (!state.user) {
-        router.push('/login');
-      } else {
-        setLoading(false);
-      }
-    });
-  }, [router]);
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
 
   // Close sidebar when route changes (mobile)
   useEffect(() => {
     setSidebarOpen(false);
   }, [router]);
 
-  if (loading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#FFFFFF' }}>
         <div className="text-center">
@@ -40,6 +37,10 @@ export default function DashboardLayout({
         </div>
       </div>
     );
+  }
+
+  if (!user) {
+    return null; // Will redirect via useEffect
   }
 
   return (

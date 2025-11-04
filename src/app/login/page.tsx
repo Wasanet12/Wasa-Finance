@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { login } from '@/lib/auth';
+import { useAuth } from '@/components/auth-provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,23 +15,30 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const router = useRouter();
+
+  const { user, loading: authLoading, login, error: authError } = useAuth();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user && !authLoading) {
+      router.push('/dashboard');
+    }
+  }, [user, authLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     try {
-      const authState = await login(email, password);
-      if (authState.error) {
-        throw new Error(authState.error);
+      const result = await login(email, password);
+      if (result.success) {
+        // AuthProvider will handle the redirect automatically
+        router.push('/dashboard');
       }
-      router.push('/dashboard');
+      // Error is handled by AuthProvider state
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Terjadi kesalahan saat login';
-      setError(errorMessage);
+      console.error('Login error:', error);
     } finally {
       setLoading(false);
     }
@@ -102,18 +109,18 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {error && (
+            {authError && (
               <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>{authError}</AlertDescription>
               </Alert>
             )}
 
             <Button
               type="submit"
               className="w-full bg-[#1B2336] text-[#FFFFFF] hover:bg-[#2D3548]"
-              disabled={loading}
+              disabled={loading || authLoading}
             >
-              {loading ? 'Sedang masuk...' : 'Login'}
+              {loading || authLoading ? 'Sedang masuk...' : 'Login'}
             </Button>
           </form>
         </CardContent>
