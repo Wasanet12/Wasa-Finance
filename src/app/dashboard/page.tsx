@@ -2,20 +2,6 @@
 
 import { useEffect, useState } from 'react';
 
-// Add custom scrollbar styles
-if (typeof window !== 'undefined') {
-  const style = document.createElement('style');
-  style.textContent = `
-    .scrollbar-hide {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-    .scrollbar-hide::-webkit-scrollbar {
-      display: none;
-    }
-  `;
-  document.head.appendChild(style);
-}
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
@@ -71,9 +57,29 @@ export default function DashboardPage() {
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1); // Current month (1-12)
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
 
-  console.log('Dashboard component mounted!');
-  console.log('Current Date:', new Date().toLocaleDateString('id-ID'));
-  console.log('Default Month:', selectedMonth, 'Default Year:', selectedYear);
+  // Add custom scrollbar styles - moved from top-level to useEffect
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const style = document.createElement('style');
+      style.textContent = `
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `;
+      document.head.appendChild(style);
+
+      // Cleanup on unmount
+      return () => {
+        if (document.head.contains(style)) {
+          document.head.removeChild(style);
+        }
+      };
+    }
+  }, []);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [metrics, setMetrics] = useState<DashboardMetrics>({

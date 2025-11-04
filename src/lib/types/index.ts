@@ -19,6 +19,7 @@ export interface Customer {
   originalPrice: number;
   discountAmount: number;
   discountPercentage?: number;
+  discount?: number; // Total discount percentage for reporting
 
   // Payment Information
   status: 'active' | 'inactive' | 'pending' | 'Belum Bayar' | 'Sudah Bayar';

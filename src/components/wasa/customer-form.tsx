@@ -38,7 +38,7 @@ const customerSchema = z.object({
   packageName: z.string().min(1, 'Pilih paket layanan'),
   packagePrice: z.number().min(0, 'Harga harus lebih dari 0'),
   discountAmount: z.number().min(0).default(0),
-  status: z.enum(['active', 'inactive', 'pending']),
+  status: z.enum(['active', 'inactive', 'pending', 'Belum Bayar', 'Sudah Bayar']),
   paymentTarget: z.enum(['Wasa', 'Kantor']),
 });
 
@@ -111,6 +111,8 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
         email: '',
         address: '',
         notes: '',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       // Only include finalPrice if there's a discount
