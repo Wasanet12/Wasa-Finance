@@ -817,7 +817,7 @@ export default function DashboardPage() {
                 <div className="p-2 rounded-lg" style={{ backgroundColor: '#10B98120' }}>
                   <TrendingUp className="h-5 w-5" style={{ color: '#FFFFFF' }} />
                 </div>
-                <span className="text-xs sm:text-sm md:text-base font-semibold">Perbandingan dengan Bulan Lalu</span>
+                <span className="text-[10px] sm:text-xs md:text-sm font-semibold">Perbandingan dengan Bulan Lalu</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
@@ -976,7 +976,7 @@ export default function DashboardPage() {
                 <div className="p-2 rounded-lg" style={{ backgroundColor: '#3B82F620' }}>
                   <Users className="h-5 w-5" style={{ color: '#FFFFFF' }} />
                 </div>
-                <span className="text-sm sm:text-base md:text-lg font-semibold">5 Pelanggan Teratas</span>
+                <span className="text-xs sm:text-sm md:text-base font-semibold">5 Pelanggan Teratas</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="px-3 sm:px-5 pb-3 sm:pb-5">
@@ -994,19 +994,19 @@ export default function DashboardPage() {
                 <TableBody>
                   {getTopCustomers().length === 0 ? (
                   <TableRow>
-                      <TableCell colSpan={3} className="text-center py-8" style={{ color: '#FFFFFF' }}>
+                      <TableCell colSpan={3} className="text-center py-6 sm:py-8" style={{ color: '#FFFFFF' }}>
                         <div className="flex flex-col items-center space-y-2">
-                          <Users className="h-8 w-8 mx-auto" style={{ color: '#FFFFFF' }} />
-                          <span>Belum ada data pelanggan</span>
+                          <Users className="h-6 w-6 sm:h-8 sm:w-8 mx-auto" style={{ color: '#FFFFFF' }} />
+                          <span className="text-[10px] sm:text-xs">Belum ada data pelanggan</span>
                         </div>
                       </TableCell>
                     </TableRow>
                   ) : (
                     getTopCustomers().map((customer, index) => (
                       <TableRow key={customer.id} className="border-b last:border-b-0" style={{ borderColor: '#1E293B' }}>
-                        <TableCell className="py-3 px-3 sm:py-4 sm:px-4">
-                          <div className="flex items-center space-x-3">
-                            <div className="flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold"
+                        <TableCell className="py-1.5 px-1 sm:py-2 sm:px-2 md:py-2.5 md:px-3">
+                          <div className="flex items-center space-x-2 sm:space-x-3">
+                            <div className="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full text-[8px] sm:text-xs font-bold"
                                  style={{
                                    backgroundColor: index === 0 ? '#FCD34D' : index === 1 ? '#A5B4FC' : '#94A3B8',
                                    color: '#FFFFFF'
@@ -1014,24 +1014,24 @@ export default function DashboardPage() {
                               {index + 1}
                             </div>
                             <div>
-                              <div className="font-medium text-white">{customer.name}</div>
+                              <div className="font-medium text-[10px] sm:text-xs text-white truncate">{customer.name}</div>
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="py-3 px-3 sm:py-4 sm:px-4 text-right">
+                        <TableCell className="py-1.5 px-1 sm:py-2 sm:px-2 md:py-2.5 md:px-3 text-right">
                           <div className="text-right">
-                            <div className="font-medium text-sm" style={{ color: '#FFFFFF' }}>
+                            <div className="font-medium text-[10px] sm:text-xs" style={{ color: '#FFFFFF' }}>
                               {customer.packageName || `Paket ${formatCurrency(customer.packagePrice)}`}
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="py-3 px-3 sm:py-4 sm:px-4 text-right">
+                        <TableCell className="py-1.5 px-1 sm:py-2 sm:px-2 md:py-2.5 md:px-3 text-right">
                           <div className="text-right">
-                            <div className="font-semibold text-lg" style={{ color: '#FFFFFF' }}>
+                            <div className="font-semibold text-sm sm:text-base" style={{ color: '#FFFFFF' }}>
                               {formatCurrency(customer.packagePrice - (customer.discountAmount || 0))}
                             </div>
                             {(customer.discountAmount || 0) > 0 && (
-                              <div className="text-xs text-orange-400 font-medium">
+                              <div className="text-[9px] sm:text-xs text-orange-400 font-medium">
                                 Diskon: {formatCurrency(customer.discountAmount || 0)}
                               </div>
                             )}
@@ -1055,7 +1055,7 @@ export default function DashboardPage() {
                 <div className="p-2 rounded-lg" style={{ backgroundColor: '#EF444420' }}>
                   <TrendingDown className="h-5 w-5" style={{ color: '#FFFFFF' }} />
                 </div>
-                <span className="text-sm sm:text-base md:text-lg font-semibold">5 Pengeluaran Teratas</span>
+                <span className="text-xs sm:text-sm md:text-base font-semibold">5 Pengeluaran Teratas</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="px-3 sm:px-5 pb-3 sm:pb-5">
@@ -1073,19 +1073,19 @@ export default function DashboardPage() {
                 <TableBody>
                   {getTopExpenses().length === 0 ? (
                   <TableRow>
-                      <TableCell colSpan={3} className="text-center py-8" style={{ color: '#FFFFFF' }}>
+                      <TableCell colSpan={3} className="text-center py-6 sm:py-8" style={{ color: '#FFFFFF' }}>
                         <div className="flex flex-col items-center space-y-2">
-                          <TrendingDown className="h-8 w-8 mx-auto" style={{ color: '#FFFFFF' }} />
-                          <span>Belum ada data pengeluaran</span>
+                          <TrendingDown className="h-6 w-6 sm:h-8 sm:w-8 mx-auto" style={{ color: '#FFFFFF' }} />
+                          <span className="text-[10px] sm:text-xs">Belum ada data pengeluaran</span>
                         </div>
                       </TableCell>
                     </TableRow>
                   ) : (
                     getTopExpenses().map((expense, index) => (
                       <TableRow key={expense.id} className="border-b last:border-b-0 hover:bg-white/5 transition-colors" style={{ borderColor: '#1E293B' }}>
-                        <TableCell className="py-3 px-3 sm:py-4 sm:px-4">
-                          <div className="flex items-center space-x-3">
-                            <div className="flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold"
+                        <TableCell className="py-1.5 px-1 sm:py-2 sm:px-2 md:py-2.5 md:px-3">
+                          <div className="flex items-center space-x-2 sm:space-x-3">
+                            <div className="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full text-[8px] sm:text-xs font-bold"
                                  style={{
                                    backgroundColor: index === 0 ? '#F87171' : index === 1 ? '#FB923C' : '#94A3B8',
                                    color: '#FFFFFF'
@@ -1093,8 +1093,8 @@ export default function DashboardPage() {
                               {index + 1}
                             </div>
                             <div>
-                              <div className="font-medium text-white">{expense.description}</div>
-                              <div className="text-xs mt-1" style={{ color: '#FFFFFF' }}>
+                              <div className="font-medium text-[10px] sm:text-xs text-white truncate">{expense.description}</div>
+                              <div className="text-[9px] sm:text-xs mt-0.5" style={{ color: '#FFFFFF' }}>
                                 {(toDate(expense?.date || new Date()) || new Date()).toLocaleDateString('id-ID', {
                                   day: 'numeric',
                                   month: 'short',
@@ -1104,8 +1104,8 @@ export default function DashboardPage() {
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="py-3 px-3 sm:py-4 sm:px-4 text-right">
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
+                        <TableCell className="py-1.5 px-1 sm:py-2 sm:px-2 md:py-2.5 md:px-3 text-right">
+                          <span className="inline-flex items-center px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[9px] sm:text-xs font-medium"
                                 style={{
                                   backgroundColor: '#2D3548',
                                   color: '#FFFFFF'
@@ -1113,12 +1113,12 @@ export default function DashboardPage() {
                             {expense.category}
                           </span>
                         </TableCell>
-                        <TableCell className="py-3 px-3 sm:py-4 sm:px-4 text-right">
+                        <TableCell className="py-1.5 px-1 sm:py-2 sm:px-2 md:py-2.5 md:px-3 text-right">
                           <div className="text-right">
-                            <div className="font-semibold text-lg" style={{ color: '#FFFFFF' }}>
+                            <div className="font-semibold text-sm sm:text-base" style={{ color: '#FFFFFF' }}>
                               {formatCurrency(expense.amount)}
                             </div>
-                            <div className="text-xs" style={{ color: '#FFFFFF' }}>
+                            <div className="text-[9px] sm:text-xs" style={{ color: '#FFFFFF' }}>
                               {(toDate(expense?.date || new Date()) || new Date()).toLocaleDateString('id-ID', {
                                 month: 'short',
                                 day: 'numeric'
