@@ -1,8 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { services } from '@/lib/firestore';
-import { dateToTimestamp } from '@/lib/firestore';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     console.log('Adding sample data...');
 
@@ -19,6 +18,8 @@ export async function GET(request: NextRequest) {
         discountAmount: 0,
         status: 'active' as const,
         paymentTarget: 'Wasa' as const,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       {
         name: 'Jane Smith',
@@ -31,6 +32,8 @@ export async function GET(request: NextRequest) {
         discountAmount: 0,
         status: 'pending' as const,
         paymentTarget: 'Kantor' as const,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       {
         name: 'Bob Johnson',
@@ -43,6 +46,8 @@ export async function GET(request: NextRequest) {
         discountAmount: 0,
         status: 'active' as const,
         paymentTarget: 'Wasa' as const,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }
     ];
 
@@ -53,18 +58,24 @@ export async function GET(request: NextRequest) {
         amount: 1500000,
         category: 'Marketing',
         date: new Date(2024, 9, 15), // October 15, 2024
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       {
         description: 'Gaji Staff',
         amount: 3000000,
         category: 'Gaji',
         date: new Date(2024, 9, 20), // October 20, 2024
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       {
         description: 'Sewa Kantor',
         amount: 2000000,
         category: 'Operasional',
         date: new Date(2024, 9, 25), // October 25, 2024
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }
     ];
 

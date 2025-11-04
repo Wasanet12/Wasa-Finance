@@ -256,7 +256,7 @@ export default function ExpensesPage() {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Hapus Biaya</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Apakah Anda yakin ingin menghapus biaya "{expense.description}"?
+                                Apakah Anda yakin ingin menghapus biaya &quot;{expense.description}&quot;?
                                 Tindakan ini tidak dapat dibatalkan.
                               </AlertDialogDescription>
                             </AlertDialogHeader>

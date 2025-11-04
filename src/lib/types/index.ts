@@ -21,7 +21,7 @@ export interface Customer {
   discountPercentage?: number;
 
   // Payment Information
-  status: 'active' | 'inactive' | 'pending';
+  status: 'active' | 'inactive' | 'pending' | 'Belum Bayar' | 'Sudah Bayar';
   paymentTarget: 'Wasa' | 'Kantor';
   paymentMethod?: 'cash' | 'transfer' | 'e-wallet' | 'credit_card';
   paymentDate?: Date;

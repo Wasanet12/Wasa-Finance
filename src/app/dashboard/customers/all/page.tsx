@@ -34,10 +34,10 @@ import {
 import { CustomerForm } from '@/components/wasa/customer-form';
 import { MarkUnpaidForm } from '@/components/wasa/mark-unpaid-form';
 import { Customer } from '@/lib/types';
-import { services, getCustomers, deleteCustomer } from '@/lib/firestore';
+import { getCustomers, deleteCustomer } from '@/lib/firestore';
 import { generateCustomerPDFReport } from '@/utils/pdfGenerator';
 import { formatDate, formatCurrency, toDate } from '@/utils/dateUtils';
-import { Search, Edit, Trash2, Users, UserCheck, UserX, DollarSign, Building2, Tag, Download, AlertCircle, Filter, ArrowUpDown } from 'lucide-react';
+import { Search, Edit, Trash2, Users, UserCheck, DollarSign, Building2, Tag, Download, AlertCircle, Filter, ArrowUpDown } from 'lucide-react';
 
 export default function AllCustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -500,7 +500,7 @@ export default function AllCustomersPage() {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Hapus Pelanggan</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Apakah Anda yakin ingin menghapus pelanggan "{customer.name}"?
+                                Apakah Anda yakin ingin menghapus pelanggan &quot;{customer.name}&quot;?
                                 Tindakan ini tidak dapat dibatalkan.
                               </AlertDialogDescription>
                             </AlertDialogHeader>

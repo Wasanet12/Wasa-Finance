@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { formatDate, formatCurrency } from '@/utils/dateUtils';
+import { formatDate } from '@/utils/dateUtils';
 
 export default function OffCustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);

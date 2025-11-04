@@ -24,8 +24,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { services } from '@/lib/firestore';
 import { Customer, Expense } from '@/lib/types';
 import { generatePDFReport } from '@/utils/pdfGenerator';
-import { toDate, formatCurrency, formatDate } from '@/utils/dateUtils';
-import { LayoutDashboard, DollarSign, Users, TrendingUp, TrendingDown, Building2, UserCheck, UserX, Wallet, Download, Table, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
+import { toDate } from '@/utils/dateUtils';
+import { LayoutDashboard, DollarSign, Users, TrendingUp, TrendingDown, Building2, UserCheck, Download, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
 import {
   Table as UITable,
   TableBody,
@@ -130,7 +130,7 @@ export default function DashboardPage() {
       setSelectedMonth(currentMonth);
       setSelectedYear(currentYear);
     }
-  }, []); // Only run once on mount
+  }, [selectedMonth, selectedYear]); // Add dependencies for proper ESLint compliance
 
   useEffect(() => {
     calculateMetrics();
@@ -372,9 +372,8 @@ export default function DashboardPage() {
     console.log('Actual net profit difference:', wasaNetProfitBeforeDiscount - wasaNetProfitAfterDiscount);
     console.log('=== END DEBUG ===');
 
-    // 8. Total revenue after discount (only for display purposes)
+    // 8. Calculate revenue after discount
     // Office revenue unchanged, Wasa revenue reduced by discount
-    const totalRevenueAfterDiscount = totalRevenueBeforeDiscount - wasaTotalDiscount;
 
     // Count customers by payment target (handle missing paymentTarget field)
     const customersPayToWasaCount = filteredCustomers.filter(
@@ -823,9 +822,9 @@ export default function DashboardPage() {
                 <TableHeader>
                     <TableRow style={{ backgroundColor: '#1E293B' }}>
                       <TableHead className="py-2.5 px-2 md:py-3 md:px-5 text-xs font-semibold uppercase tracking-wider leading-tight" style={{ color: '#FFFFFF' }}>Metrik</TableHead>
-                      <TableHead className="py-2.5 px-2 md:px-3 md:py-4 md:px-5 text-xs font-semibold uppercase tracking-wider text-right leading-snug" style={{ color: '#FFFFFF' }}>Bulan Ini</TableHead>
-                      <TableHead className="py-2.5 px-2 md:px-3 md:py-4 md:px-5 text-xs font-semibold uppercase tracking-wider text-right leading-snug" style={{ color: '#FFFFFF' }}>Perubahan</TableHead>
-                      <TableHead className="py-2.5 px-2 md:px-3 md:py-4 md:px-5 text-xs font-semibold uppercase tracking-wider text-right leading-snug" style={{ color: '#FFFFFF' }}>Persentase</TableHead>
+                      <TableHead className="py-2.5 px-2 md:py-4 md:px-5 text-xs font-semibold uppercase tracking-wider text-right leading-snug" style={{ color: '#FFFFFF' }}>Bulan Ini</TableHead>
+                      <TableHead className="py-2.5 px-2 md:py-4 md:px-5 text-xs font-semibold uppercase tracking-wider text-right leading-snug" style={{ color: '#FFFFFF' }}>Perubahan</TableHead>
+                      <TableHead className="py-2.5 px-2 md:py-4 md:px-5 text-xs font-semibold uppercase tracking-wider text-right leading-snug" style={{ color: '#FFFFFF' }}>Persentase</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1090,7 +1089,7 @@ export default function DashboardPage() {
                             <div>
                               <div className="font-medium text-white">{expense.description}</div>
                               <div className="text-xs mt-1" style={{ color: '#FFFFFF' }}>
-                                {toDate(expense.date).toLocaleDateString('id-ID', {
+                                {toDate(expense?.date || new Date()).toLocaleDateString('id-ID', {
                                   day: 'numeric',
                                   month: 'short',
                                   year: 'numeric'
@@ -1114,7 +1113,7 @@ export default function DashboardPage() {
                               {formatCurrency(expense.amount)}
                             </div>
                             <div className="text-xs" style={{ color: '#FFFFFF' }}>
-                              {toDate(expense.date).toLocaleDateString('id-ID', {
+                              {toDate(expense?.date || new Date()).toLocaleDateString('id-ID', {
                                 month: 'short',
                                 day: 'numeric'
                               })}

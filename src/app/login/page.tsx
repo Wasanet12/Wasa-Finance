@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/components/auth-provider';
+import { useSimpleAuth } from '@/components/simple-auth-provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,11 +17,17 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const { user, loading: authLoading, login, error: authError } = useAuth();
+  const { user, loading: authLoading, login, error: authError } = useSimpleAuth();
+
+  console.log('🔑 Login Page - User:', user ? 'Logged in' : 'Not logged in');
+  console.log('🔑 Login Page - Loading:', authLoading);
+  console.log('🔑 Login Page - Error:', authError);
 
   // Redirect if already logged in
   useEffect(() => {
+    console.log('🔑 Login useEffect - authLoading:', authLoading, 'user:', !!user);
     if (user && !authLoading) {
+      console.log('🔑 Redirecting to dashboard...');
       router.push('/dashboard');
     }
   }, [user, authLoading, router]);
