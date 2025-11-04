@@ -1089,7 +1089,7 @@ export default function DashboardPage() {
                             <div>
                               <div className="font-medium text-white">{expense.description}</div>
                               <div className="text-xs mt-1" style={{ color: '#FFFFFF' }}>
-                                {toDate(expense?.date || new Date()).toLocaleDateString('id-ID', {
+                                {(toDate(expense?.date || new Date()) || new Date()).toLocaleDateString('id-ID', {
                                   day: 'numeric',
                                   month: 'short',
                                   year: 'numeric'
@@ -1113,7 +1113,7 @@ export default function DashboardPage() {
                               {formatCurrency(expense.amount)}
                             </div>
                             <div className="text-xs" style={{ color: '#FFFFFF' }}>
-                              {toDate(expense?.date || new Date()).toLocaleDateString('id-ID', {
+                              {(toDate(expense?.date || new Date()) || new Date()).toLocaleDateString('id-ID', {
                                 month: 'short',
                                 day: 'numeric'
                               })}
