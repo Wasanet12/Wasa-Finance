@@ -177,7 +177,11 @@ export default function UnpaidCustomersPage() {
                       <TableCell style={{ color: '#FFFFFF' }}>{customer.packageName}</TableCell>
                       <TableCell style={{ color: '#FFFFFF' }}>{getPriceDisplay(customer)}</TableCell>
                       <TableCell style={{ color: '#FFFFFF' }}>{getDiscountDisplay(customer)}</TableCell>
-                      <TableCell style={{ color: '#FFFFFF' }}><Badge style={{ backgroundColor: "#FFFFFF", color: "#1B2336" }} className="px-2 py-1 text-xs">{customer.paymentTarget}</Badge></TableCell>
+                      <TableCell style={{ color: '#FFFFFF' }}>
+                        <Badge className="px-2 py-1 text-xs" style={{ backgroundColor: "#FFFFFF", color: "#1B2336" }}>
+                          {customer.paymentTarget}
+                        </Badge>
+                      </TableCell>
                       <TableCell style={{ color: '#FFFFFF' }}>{formatDate(customer.createdAt)}</TableCell>
                       <TableCell className="text-right">
                         <CustomerForm

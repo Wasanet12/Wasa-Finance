@@ -1,12 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Dark mode support - Standard CSS approach */
-/* :is(.dark *) { } - Disabled to avoid editor warnings */
-
-/* Tailwind CSS v4 theme configuration - Commented out to avoid editor warnings */
-/* @theme inline { ... } - Using :root CSS variables instead */
-
 :root {
   --radius: 0.625rem;
   --background: #1B2336;
