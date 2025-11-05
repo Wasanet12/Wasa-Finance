@@ -136,18 +136,17 @@ export function ReactivateCustomerForm({ customer, onSuccess, trigger }: Reactiv
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]" style={{ backgroundColor: '#1B2336' }}>
-        <DialogHeader>
-          <DialogTitle style={{ color: '#FFFFFF' }}>
-            Aktifkan Kembali Pelanggan
+      <DialogContent className="w-full max-w-[90vw] sm:max-w-[400px] md:max-w-[425px] max-h-[85vh] overflow-y-auto" style={{ backgroundColor: '#1B2336' }}>
+        <DialogHeader className="px-3 sm:px-4 pt-3 sm:pt-4 pb-2">
+          <DialogTitle className="text-base sm:text-lg font-semibold" style={{ color: '#FFFFFF' }}>
+            Aktifkan Pelanggan
           </DialogTitle>
-          <DialogDescription style={{ color: '#FFFFFF' }}>
-            Edit informasi pelanggan untuk mengaktifkannya kembali.
-            Nama pelanggan tidak dapat diubah.
+          <DialogDescription className="text-xs sm:text-sm" style={{ color: '#FFFFFF' }}>
+            Edit informasi untuk mengaktifkan kembali.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4 px-3 sm:px-4 pb-3 sm:pb-4">
             {/* Name Display Only */}
             <div className="space-y-2">
               <label className="text-sm font-medium" style={{ color: '#FFFFFF' }}>

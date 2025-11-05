@@ -38,7 +38,7 @@ const customerSchema = z.object({
   packageName: z.string().min(1, 'Pilih paket layanan'),
   packagePrice: z.number().min(0, 'Harga harus lebih dari 0'),
   discountAmount: z.number().min(0).default(0),
-  status: z.enum(['active', 'inactive', 'pending', 'Belum Bayar', 'Sudah Bayar']),
+  status: z.enum(['active', 'inactive', 'Belum Bayar']),
   paymentTarget: z.enum(['Wasa', 'Kantor']),
 });
 
@@ -154,40 +154,45 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button style={{
-            backgroundColor: '#1B2336',
-            color: '#FFFFFF'
-          }}>
-            <Plus className="mr-2 h-4 w-4" style={{ color: '#FFFFFF' }} />
-            Tambah Pelanggan
+          <Button
+            className="h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm min-h-[32px] sm:min-h-[36px] transition-all duration-300"
+            style={{
+              backgroundColor: '#1B2336',
+              color: '#FFFFFF'
+            }}
+          >
+            <Plus className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 transition-all duration-300" style={{ color: '#FFFFFF' }} />
+            <span className="hidden sm:inline">Tambah Pelanggan</span>
+            <span className="sm:hidden">Tambah</span>
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]" style={{ backgroundColor: '#1B2336' }}>
-        <DialogHeader>
-          <DialogTitle style={{ color: '#FFFFFF' }}>
-            {customer ? 'Edit Pelanggan' : 'Tambah Pelanggan Baru'}
+      <DialogContent className="w-full max-w-[90vw] sm:max-w-[400px] md:max-w-[425px] max-h-[85vh] sm:max-h-[90vh] md:max-h-none overflow-y-auto md:overflow-visible" style={{ backgroundColor: '#1B2336' }}>
+        <DialogHeader className="px-3 sm:px-4 pt-3 sm:pt-4 pb-2">
+          <DialogTitle className="text-base sm:text-lg font-semibold" style={{ color: '#FFFFFF' }}>
+            {customer ? 'Edit Pelanggan' : 'Tambah Pelanggan'}
           </DialogTitle>
-          <DialogDescription style={{ color: '#FFFFFF' }}>
+          <DialogDescription className="text-xs sm:text-sm" style={{ color: '#FFFFFF' }}>
             {customer
-              ? 'Edit informasi pelanggan yang sudah ada.'
-              : 'Tambahkan pelanggan baru ke dalam sistem.'
+              ? 'Edit informasi pelanggan.'
+              : 'Tambahkan pelanggan baru.'
             }
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4 px-3 sm:px-4 pb-3 sm:pb-4">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel style={{ color: '#FFFFFF' }}>Nama Pelanggan</FormLabel>
+                  <FormLabel className="text-xs sm:text-sm font-medium" style={{ color: '#FFFFFF' }}>Nama Pelanggan</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Masukkan nama pelanggan"
+                      placeholder="Nama pelanggan"
                       value={field.value === 0 ? '' : field.value}
                       onChange={field.onChange}
+                      className="h-9 sm:h-10 text-xs sm:text-sm"
                       style={{
                         backgroundColor: '#2D3548',
                         color: '#FFFFFF',
@@ -195,7 +200,7 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
                       }}
                     />
                   </FormControl>
-                  <FormMessage style={{ color: '#FFFFFF' }} />
+                  <FormMessage className="text-xs" style={{ color: '#FFFFFF' }} />
                 </FormItem>
               )}
             />
@@ -206,36 +211,41 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
               name="packageName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel style={{ color: '#FFFFFF' }}>Paket Layanan</FormLabel>
+                  <FormLabel className="text-xs sm:text-sm font-medium" style={{ color: '#FFFFFF' }}>Paket Layanan</FormLabel>
                   <Select onValueChange={(value) => {
                     field.onChange(value);
                     handlePackageChange(value);
                   }} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger style={{
+                      <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm" style={{
                         backgroundColor: '#2D3548',
                         color: '#FFFFFF',
                         borderColor: '#3D4558'
                       }}>
-                        <SelectValue placeholder="Pilih paket layanan" style={{ color: '#FFFFFF' }} />
+                        <SelectValue placeholder="Pilih paket" style={{ color: '#FFFFFF' }} />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent style={{
+                    <SelectContent className="max-h-48 overflow-y-auto" style={{
                       backgroundColor: '#1B2336',
                       borderColor: '#3D4558'
                     }}>
                       {packages.map((pkg) => (
-                        <SelectItem key={pkg.id} value={pkg.name} style={{ color: '#FFFFFF' }}>
-                          {pkg.name} - {new Intl.NumberFormat('id-ID', {
-                            style: 'currency',
-                            currency: 'IDR',
-                            minimumFractionDigits: 0,
-                          }).format(pkg.price)}
+                        <SelectItem key={pkg.id} value={pkg.name} className="text-xs sm:text-sm py-1 sm:py-2" style={{ color: '#FFFFFF' }}>
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <span>{pkg.name}</span>
+                            <span className="text-xs font-medium">
+                              {new Intl.NumberFormat('id-ID', {
+                                style: 'currency',
+                                currency: 'IDR',
+                                minimumFractionDigits: 0,
+                              }).format(pkg.price)}
+                            </span>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage style={{ color: '#FFFFFF' }} />
+                  <FormMessage className="text-xs" style={{ color: '#FFFFFF' }} />
                 </FormItem>
               )}
             />
@@ -245,11 +255,11 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
               name="packagePrice"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel style={{ color: '#FFFFFF' }}>Harga Paket</FormLabel>
+                  <FormLabel className="text-xs sm:text-sm font-medium" style={{ color: '#FFFFFF' }}>Harga Paket</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                                            value={field.value === 0 ? '' : field.value}
+                      value={field.value === 0 ? '' : field.value}
                       onChange={(e) => {
                         const value = e.target.value;
                         if (value === '') {
@@ -259,6 +269,7 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
                           field.onChange(isNaN(parsedValue) ? 0 : parsedValue);
                         }
                       }}
+                      className="h-9 sm:h-10 text-xs sm:text-sm"
                       style={{
                         backgroundColor: '#2D3548',
                         color: '#FFFFFF',
@@ -266,7 +277,7 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
                       }}
                     />
                   </FormControl>
-                  <FormMessage style={{ color: '#FFFFFF' }} />
+                  <FormMessage className="text-xs" style={{ color: '#FFFFFF' }} />
                 </FormItem>
               )}
             />
@@ -276,7 +287,7 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
               name="discountAmount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel style={{ color: '#FFFFFF' }}>Diskon (Rp)</FormLabel>
+                  <FormLabel className="text-xs sm:text-sm font-medium" style={{ color: '#FFFFFF' }}>Diskon (Rp)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -291,6 +302,7 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
                           field.onChange(isNaN(parsedValue) ? 0 : parsedValue);
                         }
                       }}
+                      className="h-9 sm:h-10 text-xs sm:text-sm"
                       style={{
                         backgroundColor: '#2D3548',
                         color: '#FFFFFF',
@@ -298,7 +310,7 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
                       }}
                     />
                   </FormControl>
-                  <FormMessage style={{ color: '#FFFFFF' }} />
+                  <FormMessage className="text-xs" style={{ color: '#FFFFFF' }} />
                 </FormItem>
               )}
             />
@@ -308,27 +320,27 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
               name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel style={{ color: '#FFFFFF' }}>Status Pembayaran</FormLabel>
+                  <FormLabel className="text-xs sm:text-sm font-medium" style={{ color: '#FFFFFF' }}>Status</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger style={{
+                      <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm" style={{
                         backgroundColor: '#2D3548',
                         color: '#FFFFFF',
                         borderColor: '#3D4558'
                       }}>
-                        <SelectValue placeholder="Pilih status pembayaran" style={{ color: '#FFFFFF' }} />
+                        <SelectValue placeholder="Pilih status" style={{ color: '#FFFFFF' }} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent style={{
                       backgroundColor: '#1B2336',
                       borderColor: '#3D4558'
                     }}>
-                      <SelectItem value="active" style={{ color: '#FFFFFF' }}>Active</SelectItem>
-                      <SelectItem value="inactive" style={{ color: '#FFFFFF' }}>Inactive</SelectItem>
-                      <SelectItem value="pending" style={{ color: '#FFFFFF' }}>Pending</SelectItem>
+                      <SelectItem value="active" className="text-xs sm:text-sm py-1 sm:py-2" style={{ color: '#FFFFFF' }}>Aktif</SelectItem>
+                      <SelectItem value="inactive" className="text-xs sm:text-sm py-1 sm:py-2" style={{ color: '#FFFFFF' }}>Tidak Aktif</SelectItem>
+                      <SelectItem value="Belum Bayar" className="text-xs sm:text-sm py-1 sm:py-2" style={{ color: '#FFFFFF' }}>Belum Bayar</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormMessage style={{ color: '#FFFFFF' }} />
+                  <FormMessage className="text-xs" style={{ color: '#FFFFFF' }} />
                 </FormItem>
               )}
             />
@@ -338,35 +350,36 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
               name="paymentTarget"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel style={{ color: '#FFFFFF' }}>Tujuan Pembayaran</FormLabel>
+                  <FormLabel className="text-xs sm:text-sm font-medium" style={{ color: '#FFFFFF' }}>Bayar ke</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger style={{
+                      <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm" style={{
                         backgroundColor: '#2D3548',
                         color: '#FFFFFF',
                         borderColor: '#3D4558'
                       }}>
-                        <SelectValue placeholder="Pilih tujuan pembayaran" style={{ color: '#FFFFFF' }} />
+                        <SelectValue placeholder="Pilih tujuan" style={{ color: '#FFFFFF' }} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent style={{
                       backgroundColor: '#1B2336',
                       borderColor: '#3D4558'
                     }}>
-                      <SelectItem value="Wasa" style={{ color: '#FFFFFF' }}>Wasa</SelectItem>
-                      <SelectItem value="Kantor" style={{ color: '#FFFFFF' }}>Kantor</SelectItem>
+                      <SelectItem value="Wasa" className="text-xs sm:text-sm py-1 sm:py-2" style={{ color: '#FFFFFF' }}>Wasa</SelectItem>
+                      <SelectItem value="Kantor" className="text-xs sm:text-sm py-1 sm:py-2" style={{ color: '#FFFFFF' }}>Kantor</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormMessage style={{ color: '#FFFFFF' }} />
+                  <FormMessage className="text-xs" style={{ color: '#FFFFFF' }} />
                 </FormItem>
               )}
             />
 
-            <div className="flex justify-end space-x-2">
+            <div className="flex flex-col sm:flex-row justify-end gap-2 pt-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
+                className="w-full sm:w-auto h-8 sm:h-9 text-xs sm:text-sm order-2 sm:order-1 min-h-[36px]"
                 style={{
                   backgroundColor: 'transparent',
                   color: '#FFFFFF',
@@ -378,6 +391,7 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
               <Button
                 type="submit"
                 disabled={loading}
+                className="w-full sm:w-auto h-8 sm:h-9 text-xs sm:text-sm order-1 sm:order-2 min-h-[36px]"
                 style={{
                   backgroundColor: '#10B981',
                   color: '#FFFFFF'

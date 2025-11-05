@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { services } from '@/lib/firestore';
 import { Customer } from '@/lib/types';
-import { UserX, AlertTriangle, TrendingUp, Percent } from 'lucide-react';
+import { UserX, AlertTriangle, TrendingUp, Edit, Percent } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -15,7 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { DiscountForm } from '@/components/wasa/discount-form';
+import { CustomerForm } from '@/components/wasa/customer-form';
 import { formatDate, formatCurrency } from '@/utils/dateUtils';
 
 export default function UnpaidCustomersPage() {
@@ -28,8 +28,8 @@ export default function UnpaidCustomersPage() {
 
   const fetchUnpaidCustomers = async () => {
     try {
-      // Firebase uses "pending" for unpaid customers
-      const response = await services.customer.getByStatus('pending');
+      // Get customers with "Belum Bayar" status
+      const response = await services.customer.getByStatus('Belum Bayar');
       if (response.success && response.data) {
         setCustomers(response.data);
       } else {
@@ -160,7 +160,7 @@ export default function UnpaidCustomersPage() {
                   <TableHead style={{ color: '#FFFFFF' }}>Diskon</TableHead>
                   <TableHead style={{ color: '#FFFFFF' }}>Tujuan Bayar</TableHead>
                   <TableHead style={{ color: '#FFFFFF' }}>Tanggal Daftar</TableHead>
-                  <TableHead className="text-right" style={{ color: '#FFFFFF' }}>Aksi</TableHead>
+                  <TableHead className="text-right" style={{ color: '#FFFFFF' }}>Edit</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -180,7 +180,7 @@ export default function UnpaidCustomersPage() {
                       <TableCell style={{ color: '#FFFFFF' }}><Badge style={{ backgroundColor: "#FFFFFF", color: "#1B2336" }} className="px-2 py-1 text-xs">{customer.paymentTarget}</Badge></TableCell>
                       <TableCell style={{ color: '#FFFFFF' }}>{formatDate(customer.createdAt)}</TableCell>
                       <TableCell className="text-right">
-                        <DiscountForm
+                        <CustomerForm
                           customer={customer}
                           onSuccess={fetchUnpaidCustomers}
                           trigger={
@@ -193,7 +193,7 @@ export default function UnpaidCustomersPage() {
                                 borderColor: '#3D4558'
                               }}
                             >
-                              <Percent className="h-4 w-4" />
+                              <Edit className="h-4 w-4" />
                             </Button>
                           }
                         />

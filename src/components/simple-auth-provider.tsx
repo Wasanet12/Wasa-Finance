@@ -34,17 +34,12 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
   const [auth, setAuth] = useState<any>(null);
 
   useEffect(() => {
-    console.log('🔧 SimpleAuthProvider: Using existing Firebase auth...');
-
     try {
       // Use existing auth instance to avoid multiple initialization
       setAuth(firebaseAuth);
-      console.log('✅ Using existing auth instance:', firebaseAuth);
 
       // Listen for auth state changes
       const unsubscribe = onAuthStateChanged(firebaseAuth, (firebaseUser) => {
-        console.log('🔄 Auth state changed:', firebaseUser ? 'User logged in' : 'No user');
-
         if (firebaseUser) {
           const user: User = {
             uid: firebaseUser.uid,
@@ -57,10 +52,8 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
             isActive: true
           };
           setUser(user);
-          console.log('✅ User state set:', user);
         } else {
           setUser(null);
-          console.log('🚫 User state cleared');
         }
 
         setLoading(false);
@@ -68,7 +61,6 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
       });
 
       return () => {
-        console.log('🔌 Unsubscribing from auth state changes');
         unsubscribe();
       };
     } catch (error) {
@@ -80,16 +72,13 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     if (!auth) {
-      console.error('❌ Auth not initialized');
       return { success: false, error: 'Authentication not initialized' };
     }
 
     try {
-      console.log('🔑 SimpleAuthProvider login attempt:', { email });
       setError(null);
 
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      console.log('✅ Firebase signIn successful:', userCredential.user);
 
       // User state will be updated by onAuthStateChanged listener
       return { success: true };
@@ -106,7 +95,6 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
 
     try {
       await signOut(auth);
-      console.log('✅ Logged out successfully');
     } catch (error: any) {
       console.error('❌ Logout error:', error);
       setError('Error during logout');

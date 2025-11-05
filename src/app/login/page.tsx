@@ -19,15 +19,9 @@ export default function LoginPage() {
 
   const { user, loading: authLoading, login, error: authError } = useSimpleAuth();
 
-  console.log('🔑 Login Page - User:', user ? 'Logged in' : 'Not logged in');
-  console.log('🔑 Login Page - Loading:', authLoading);
-  console.log('🔑 Login Page - Error:', authError);
-
   // Redirect if already logged in
   useEffect(() => {
-    console.log('🔑 Login useEffect - authLoading:', authLoading, 'user:', !!user);
     if (user && !authLoading) {
-      console.log('🔑 Redirecting to dashboard...');
       router.push('/dashboard');
     }
   }, [user, authLoading, router]);

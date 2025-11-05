@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSimpleAuth } from '@/components/simple-auth-provider';
 import { Sidebar } from '@/components/wasa/sidebar';
+import { MonthYearProvider } from '@/contexts/MonthYearContext';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -16,17 +17,10 @@ export default function DashboardLayout({
   const router = useRouter();
   const { user, loading: authLoading } = useSimpleAuth();
 
-  console.log('🏠 Dashboard Layout - User:', user ? 'Logged in' : 'Not logged in');
-  console.log('🏠 Dashboard Layout - Loading:', authLoading);
-
   // Redirect if not authenticated
   useEffect(() => {
-    console.log('🏠 Dashboard useEffect - authLoading:', authLoading, 'user:', !!user);
     if (!authLoading && !user) {
-      console.log('🏠 Redirecting to login...');
       router.push('/login');
-    } else if (!authLoading && user) {
-      console.log('🏠 User authenticated, showing dashboard');
     }
   }, [user, authLoading, router]);
 
@@ -104,7 +98,9 @@ export default function DashboardLayout({
 
         {/* Page Content */}
         <div className="p-2 sm:p-3 md:p-4 lg:p-6">
-          {children}
+          <MonthYearProvider>
+            {children}
+          </MonthYearProvider>
         </div>
       </main>
     </div>

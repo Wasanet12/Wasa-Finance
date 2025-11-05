@@ -31,9 +31,9 @@ export function MarkUnpaidForm({ customer, onSuccess, trigger }: MarkUnpaidFormP
   const handleMarkAsUnpaid = async () => {
     setLoading(true);
     try {
-      // Update customer status to 'pending' (belum bayar)
+      // Update customer status to 'Belum Bayar'
       const updateData: Partial<Customer> = {
-        status: 'pending',
+        status: 'Belum Bayar',
         paymentNotes: `Ditandai sebagai belum bayar pada ${formatDate(new Date())}`
       };
 
@@ -84,7 +84,7 @@ export function MarkUnpaidForm({ customer, onSuccess, trigger }: MarkUnpaidFormP
           <br /><br />
           Tindakan ini akan:
           <ul className="list-disc list-inside mt-2 space-y-1">
-            <li>Mengubah status pelanggan menjadi "Pending"</li>
+            <li>Mengubah status pelanggan menjadi "Belum Bayar"</li>
             <li>Menampilkan pelanggan di halaman "Pelanggan Belum Bayar"</li>
             <li>Memberikan kesempatan untuk memberikan diskon</li>
           </ul>

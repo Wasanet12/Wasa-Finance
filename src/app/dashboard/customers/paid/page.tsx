@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { services } from '@/lib/firestore';
 import { Customer } from '@/lib/types';
-import { UserCheck, DollarSign, Building2, CreditCard, Building } from 'lucide-react';
+import { UserCheck, DollarSign, Building2, CreditCard, Building, Download } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -26,7 +27,8 @@ export default function PaidCustomersPage() {
 
   const fetchPaidCustomers = async () => {
     try {
-      // Firebase uses "active" instead of "Sudah Bayar"
+      // Firebase uses "active" for paid customers
+      // Show ALL active customers regardless of when they were created
       const response = await services.customer.getByStatus('active');
       if (response.success && response.data) {
         setCustomers(response.data);
@@ -43,13 +45,13 @@ export default function PaidCustomersPage() {
   };
 
   
-  const totalRevenue = customers.reduce((sum, customer) => sum + customer.packagePrice, 0);
+  const totalRevenue = customers.reduce((sum, customer) => sum + (customer.packagePrice - (customer.discountAmount || 0)), 0);
   const wasaRevenue = customers
     .filter(customer => customer.paymentTarget === 'Wasa')
-    .reduce((sum, customer) => sum + customer.packagePrice, 0);
+    .reduce((sum, customer) => sum + (customer.packagePrice - (customer.discountAmount || 0)), 0);
   const officeRevenue = customers
     .filter(customer => customer.paymentTarget === 'Kantor')
-    .reduce((sum, customer) => sum + customer.packagePrice, 0);
+    .reduce((sum, customer) => sum + (customer.packagePrice - (customer.discountAmount || 0)), 0);
 
   if (loading) {
     return (
@@ -59,11 +61,43 @@ export default function PaidCustomersPage() {
     );
   }
 
+  const handleDownloadPDF = () => {
+    try {
+      // Create a temporary array with the customers for PDF generation
+      const pdfData = {
+        customers: customers,
+        title: 'Daftar Pelanggan Aktif'
+      };
+
+      // You can implement PDF generation here if needed
+      console.log('PDF data prepared:', pdfData);
+      alert(`PDF akan menampilkan ${customers.length} pelanggan aktif`);
+    } catch (error) {
+      console.error('Error preparing PDF:', error);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-2">
         <UserCheck className="h-6 w-6" style={{ color: '#1B2336' }} />
-        <h1 className="text-3xl font-bold" style={{ color: '#1B2336' }}>Pelanggan Sudah Bayar</h1>
+        <h1 className="text-3xl font-bold" style={{ color: '#1B2336' }}>Pelanggan Aktif</h1>
+      </div>
+
+      {/* Download Button */}
+      <div className="flex justify-end">
+        <Button
+          onClick={handleDownloadPDF}
+          style={{
+            backgroundColor: '#1B2336',
+            color: '#FFFFFF',
+            borderColor: '#3D4558',
+          }}
+          className="flex items-center space-x-2 px-4 py-2 hover:bg-opacity-90 transition-colors"
+        >
+          <Download className="h-4 w-4" />
+          <span>Download PDF</span>
+        </Button>
       </div>
 
       {/* Revenue Summary */}
@@ -172,7 +206,7 @@ export default function PaidCustomersPage() {
       {/* Customers Table */}
       <Card className="border-border" style={{ backgroundColor: '#1B2336' }}>
         <CardHeader>
-          <CardTitle style={{ color: '#FFFFFF' }}>Daftar Pelanggan Sudah Bayar</CardTitle>
+          <CardTitle style={{ color: '#FFFFFF' }}>Daftar Pelanggan Aktif</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border" style={{ borderColor: '#3D4558' }}>

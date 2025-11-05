@@ -28,25 +28,17 @@ import { services } from '@/lib/firestore';
 import { Expense } from '@/lib/types';
 import { generateExpensePDFReport } from '@/utils/pdfGenerator';
 import { formatDate, formatCurrency } from '@/utils/dateUtils';
-import { Search, Edit, Trash2, DollarSign, TrendingDown, Download } from 'lucide-react';
+import { Edit, Trash2, DollarSign, TrendingDown, Download } from 'lucide-react';
 
 export default function ExpensesPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [filteredExpenses, setFilteredExpenses] = useState<Expense[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchExpenses();
   }, []);
 
-  useEffect(() => {
-    const filtered = expenses.filter(expense =>
-      expense.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredExpenses(filtered);
-  }, [expenses, searchTerm]);
-
+  
   const fetchExpenses = async () => {
     try {
       const response = await services.expense.getAll();
@@ -78,8 +70,8 @@ export default function ExpensesPage() {
   };
 
   
-  const totalExpenses = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
-  const currentMonthExpenses = filteredExpenses
+  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+  const currentMonthExpenses = expenses
     .filter(expense => {
       const expenseDate = new Date(expense.date);
       const now = new Date();
@@ -90,7 +82,7 @@ export default function ExpensesPage() {
 
   const handleDownloadPDF = () => {
     try {
-      generateExpensePDFReport(filteredExpenses, `Laporan-Biaya-${new Date().toISOString().split('T')[0]}.pdf`);
+      generateExpensePDFReport(expenses, `Laporan-Biaya-${new Date().toISOString().split('T')[0]}.pdf`);
       console.log('Expense PDF report generated successfully');
     } catch (error) {
       console.error('Error generating expense PDF report:', error);
@@ -177,40 +169,21 @@ export default function ExpensesPage() {
           <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2" style={{ color: '#FFFFFF' }}>
             <span className="text-lg sm:text-xl">Daftar Biaya Operasional</span>
             <div className="text-sm font-normal" style={{ color: '#FFFFFF' }}>
-              Total: {filteredExpenses.length} biaya
+              Total: {expenses.length} biaya
             </div>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-3 sm:p-6">
-          {/* Search Section */}
-          <div className="flex items-center space-x-2 mb-4">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-2 top-2.5 h-4 w-4" style={{ color: '#FFFFFF' }} />
-              <Input
-                placeholder="Cari biaya..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 h-10"
-                style={{
-                  backgroundColor: '#2D3548',
-                  color: '#FFFFFF',
-                  borderColor: '#3D4558'
-                }}
-              />
-            </div>
-          </div>
-
+          
           {/* Mobile Card Layout */}
           <div className="block lg:hidden">
-            {filteredExpenses.length === 0 ? (
+            {expenses.length === 0 ? (
               <div className="text-center py-8" style={{ color: '#FFFFFF' }}>
-                {searchTerm
-                  ? 'Tidak ada biaya yang cocok dengan pencarian.'
-                  : 'Belum ada data biaya operasional.'}
+                Belum ada data biaya operasional.
               </div>
             ) : (
               <div className="space-y-3">
-                {filteredExpenses.map((expense) => (
+                {expenses.map((expense) => (
                   <div
                     key={expense.id}
                     className="rounded-lg border p-4"
@@ -291,16 +264,14 @@ export default function ExpensesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredExpenses.length === 0 ? (
+                {expenses.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center py-8" style={{ color: '#FFFFFF' }}>
-                      {searchTerm
-                        ? 'Tidak ada biaya yang cocok dengan pencarian.'
-                        : 'Belum ada data biaya operasional.'}
+                      Belum ada data biaya operasional.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredExpenses.map((expense) => (
+                  expenses.map((expense) => (
                     <TableRow key={expense.id}>
                       <TableCell className="font-medium" style={{ color: '#FFFFFF' }}>{expense.description}</TableCell>
                       <TableCell className="font-semibold" style={{ color: '#FFFFFF' }}>

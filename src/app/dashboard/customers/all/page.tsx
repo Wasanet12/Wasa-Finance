@@ -24,27 +24,18 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { CustomerForm } from '@/components/wasa/customer-form';
 import { MarkUnpaidForm } from '@/components/wasa/mark-unpaid-form';
 import { Customer } from '@/lib/types';
 import { getCustomers, deleteCustomer } from '@/lib/firestore';
 import { generateCustomerPDFReport } from '@/utils/pdfGenerator';
 import { formatDate, formatCurrency, toDate } from '@/utils/dateUtils';
-import { Search, Edit, Trash2, Users, UserCheck, DollarSign, Building2, Tag, Download, AlertCircle, Filter, ArrowUpDown } from 'lucide-react';
+import { Search, Edit, Trash2, Users, UserCheck, DollarSign, Building2, Tag, Download, AlertCircle } from 'lucide-react';
 
 export default function AllCustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<'name' | 'date' | 'price'>('date');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -57,33 +48,8 @@ export default function AllCustomersPage() {
       customer.packageName.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Apply status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(customer => {
-        if (statusFilter === 'pending') {
-          return customer.status === 'pending' || customer.status === 'Belum Bayar';
-        }
-        return customer.status === statusFilter;
-      });
-    }
-
-    // Apply sorting
-    filtered = [...filtered].sort((a, b) => {
-      switch (sortBy) {
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'price':
-          return b.packagePrice - a.packagePrice;
-        case 'date':
-        default:
-          const dateA = toDate(a.createdAt) || new Date(0);
-          const dateB = toDate(b.createdAt) || new Date(0);
-          return dateB.getTime() - dateA.getTime();
-      }
-    });
-
     setFilteredCustomers(filtered);
-  }, [customers, searchTerm, statusFilter, sortBy]);
+  }, [customers, searchTerm]);
 
   const fetchCustomers = async () => {
     try {
@@ -117,8 +83,6 @@ export default function AllCustomersPage() {
     const styles = {
       'active': { backgroundColor: '#10B981', color: '#FFFFFF' },
       'inactive': { backgroundColor: '#EF4444', color: '#FFFFFF' },
-      'pending': { backgroundColor: '#F59E0B', color: '#FFFFFF' }, // Belum Bayar
-      'Sudah Bayar': { backgroundColor: '#10B981', color: '#FFFFFF' },
       'Belum Bayar': { backgroundColor: '#F59E0B', color: '#FFFFFF' },
       'Off': { backgroundColor: '#6B7280', color: '#FFFFFF' },
     };
@@ -130,8 +94,6 @@ export default function AllCustomersPage() {
     const displayNames = {
       'active': 'Aktif',
       'inactive': 'Tidak Aktif',
-      'pending': 'Belum Bayar',
-      'Sudah Bayar': 'Sudah Bayar',
       'Belum Bayar': 'Belum Bayar',
       'Off': 'Off',
     };
@@ -187,7 +149,7 @@ export default function AllCustomersPage() {
   
   const canMarkAsUnpaid = (customer: Customer) => {
     // Only active customers can be marked as unpaid
-    return customer.status === 'active' || customer.status === 'Sudah Bayar';
+    return customer.status === 'active';
   };
 
   if (loading) {
@@ -347,8 +309,8 @@ export default function AllCustomersPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-3 sm:p-6">
-          {/* Search and Filter Section */}
-          <div className="space-y-4 mb-4">
+          {/* Search Section */}
+          <div className="mb-4">
             {/* Search Bar */}
             <div className="flex items-center space-x-2">
               <div className="relative flex-1 max-w-sm">
@@ -364,51 +326,6 @@ export default function AllCustomersPage() {
                     borderColor: '#3D4558'
                   }}
                 />
-              </div>
-            </div>
-
-            {/* Filter and Sort Controls */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              {/* Status Filter */}
-              <div className="flex items-center space-x-2">
-                <Filter className="h-4 w-4" style={{ color: '#FFFFFF' }} />
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-40" style={{
-                    backgroundColor: '#2D3548',
-                    color: '#FFFFFF',
-                    borderColor: '#3D4558'
-                  }}>
-                    <SelectValue placeholder="Filter Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Semua Status</SelectItem>
-                    <SelectItem value="active">Aktif</SelectItem>
-                    <SelectItem value="pending">Belum Bayar</SelectItem>
-                    <SelectItem value="inactive">Tidak Aktif</SelectItem>
-                    <SelectItem value="Sudah Bayar">Sudah Bayar</SelectItem>
-                    <SelectItem value="Belum Bayar">Belum Bayar (Lama)</SelectItem>
-                    <SelectItem value="Off">Off</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Sort Options */}
-              <div className="flex items-center space-x-2">
-                <ArrowUpDown className="h-4 w-4" style={{ color: '#FFFFFF' }} />
-                <Select value={sortBy} onValueChange={(value: 'name' | 'date' | 'price') => setSortBy(value)}>
-                  <SelectTrigger className="w-40" style={{
-                    backgroundColor: '#2D3548',
-                    color: '#FFFFFF',
-                    borderColor: '#3D4558'
-                  }}>
-                    <SelectValue placeholder="Urutkan" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="date">Tanggal Daftar</SelectItem>
-                    <SelectItem value="name">Nama</SelectItem>
-                    <SelectItem value="price">Harga Tertinggi</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
             </div>
           </div>
