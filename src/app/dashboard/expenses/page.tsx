@@ -225,19 +225,27 @@ export default function ExpensesPage() {
                               <Trash2 className="h-3 w-3" />
                             </Button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Hapus Biaya</AlertDialogTitle>
-                              <AlertDialogDescription>
+                          <AlertDialogContent className="w-full max-w-[90vw] sm:max-w-[400px] md:max-w-[425px]" style={{ backgroundColor: '#1B2336', borderColor: '#3D4558' }}>
+                            <AlertDialogHeader className="px-3 sm:px-4 pt-3 sm:pt-4 pb-2">
+                              <AlertDialogTitle className="text-base sm:text-lg font-semibold" style={{ color: '#FFFFFF' }}>
+                                Hapus Biaya
+                              </AlertDialogTitle>
+                              <AlertDialogDescription className="text-xs sm:text-sm" style={{ color: '#B8BFCC' }}>
                                 Apakah Anda yakin ingin menghapus biaya &quot;{expense.description}&quot;?
                                 Tindakan ini tidak dapat dibatalkan.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Batal</AlertDialogCancel>
+                            <AlertDialogFooter className="px-3 sm:px-4 pb-3 sm:pb-4 gap-2 sm:gap-3">
+                              <AlertDialogCancel className="flex-1 sm:flex-none h-9 sm:h-10 text-xs sm:text-sm px-3 sm:px-4" style={{
+                                backgroundColor: 'transparent',
+                                color: '#FFFFFF',
+                                borderColor: '#3D4558'
+                              }}>
+                                Batal
+                              </AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() => handleDeleteExpense(expense.id!)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                className="flex-1 sm:flex-none h-9 sm:h-10 text-xs sm:text-sm px-3 sm:px-4 bg-red-600 text-white hover:bg-red-700"
                               >
                                 Hapus
                               </AlertDialogAction>
@@ -295,19 +303,27 @@ export default function ExpensesPage() {
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Hapus Biaya</AlertDialogTitle>
-                                <AlertDialogDescription>
+                            <AlertDialogContent className="w-full max-w-[90vw] sm:max-w-[400px] md:max-w-[425px]" style={{ backgroundColor: '#1B2336', borderColor: '#3D4558' }}>
+                              <AlertDialogHeader className="px-3 sm:px-4 pt-3 sm:pt-4 pb-2">
+                                <AlertDialogTitle className="text-base sm:text-lg font-semibold" style={{ color: '#FFFFFF' }}>
+                                  Hapus Biaya
+                                </AlertDialogTitle>
+                                <AlertDialogDescription className="text-xs sm:text-sm" style={{ color: '#B8BFCC' }}>
                                   Apakah Anda yakin ingin menghapus biaya &quot;{expense.description}&quot;?
                                   Tindakan ini tidak dapat dibatalkan.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Batal</AlertDialogCancel>
+                              <AlertDialogFooter className="px-3 sm:px-4 pb-3 sm:pb-4 gap-2 sm:gap-3">
+                                <AlertDialogCancel className="flex-1 sm:flex-none h-9 sm:h-10 text-xs sm:text-sm px-3 sm:px-4" style={{
+                                  backgroundColor: 'transparent',
+                                  color: '#FFFFFF',
+                                  borderColor: '#3D4558'
+                                }}>
+                                  Batal
+                                </AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => handleDeleteExpense(expense.id!)}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  className="flex-1 sm:flex-none h-9 sm:h-10 text-xs sm:text-sm px-3 sm:px-4 bg-red-600 text-white hover:bg-red-700"
                                 >
                                   Hapus
                                 </AlertDialogAction>

@@ -103,12 +103,18 @@ export function ExpenseForm({ expense, onSuccess, trigger }: ExpenseFormProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button style={{
-            backgroundColor: '#1B2336',
-            color: '#FFFFFF'
-          }}>
-            <Plus className="mr-2 h-4 w-4" style={{ color: '#FFFFFF' }} />
-            Tambah Biaya
+          <Button
+            className="flex items-center justify-center space-x-2 px-4 py-2 text-sm sm:text-base hover:bg-opacity-90 transition-colors"
+            style={{
+              backgroundColor: '#1B2336',
+              color: '#FFFFFF',
+              borderColor: '#3D4558',
+              minHeight: '44px', // Touch-friendly size
+            }}
+          >
+            <Plus className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+            <span className="hidden sm:inline">Tambah Biaya</span>
+            <span className="sm:hidden">Tambah</span>
           </Button>
         )}
       </DialogTrigger>
@@ -196,6 +202,7 @@ export function ExpenseForm({ expense, onSuccess, trigger }: ExpenseFormProps) {
                         color: '#FFFFFF',
                         borderColor: '#3D4558'
                       }}
+                      className="date-input-white"
                     />
                   </FormControl>
                   <FormMessage style={{ color: '#FFFFFF' }} />

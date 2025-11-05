@@ -92,11 +92,13 @@ export default function PaidCustomersPage() {
             backgroundColor: '#1B2336',
             color: '#FFFFFF',
             borderColor: '#3D4558',
+            minHeight: '44px', // Touch-friendly size
           }}
-          className="flex items-center space-x-2 px-4 py-2 hover:bg-opacity-90 transition-colors"
+          className="flex items-center justify-center space-x-2 px-4 py-2 text-sm sm:text-base hover:bg-opacity-90 transition-colors"
         >
-          <Download className="h-4 w-4" />
-          <span>Download PDF</span>
+          <Download className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+          <span className="hidden sm:inline">Download PDF</span>
+          <span className="sm:hidden">Unduh PDF</span>
         </Button>
       </div>
 

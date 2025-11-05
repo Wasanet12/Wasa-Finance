@@ -101,13 +101,13 @@ export function Sidebar({ className }: SidebarProps) {
                   className={cn(
                     "w-full justify-start h-10 sm:h-11 px-3 sm:px-4 rounded-lg transition-all duration-200",
                     isActive
-                      ? "bg-secondary text-secondary-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                      ? "bg-white text-[#1B2336] shadow-sm font-semibold"
+                      : "text-muted-foreground hover:text-[#1B2336] hover:bg-white hover:shadow-md"
                   )}
                   asChild
                 >
-                  <Link href={item.href}>
-                    <item.icon className="mr-3 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                  <Link href={item.href} className="group">
+                    <item.icon className="mr-3 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-200" />
                     <span className="font-medium text-sm sm:text-base truncate">{item.name}</span>
                   </Link>
                 </Button>
@@ -120,11 +120,13 @@ export function Sidebar({ className }: SidebarProps) {
       <div className="px-2 sm:px-4 py-3 sm:py-4 border-t border-border">
         <Button
           variant="ghost"
-          className="w-full justify-start h-10 sm:h-11 px-3 sm:px-4 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-lg transition-all duration-200"
+          className="w-full justify-start h-10 sm:h-11 px-3 sm:px-4 text-muted-foreground hover:text-[#1B2336] hover:bg-white hover:shadow-md rounded-lg transition-all duration-200"
           onClick={handleLogout}
         >
-          <LogOut className="mr-3 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-          <span className="font-medium text-sm sm:text-base">Keluar</span>
+          <div className="flex items-center">
+            <LogOut className="mr-3 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+            <span className="font-medium text-sm sm:text-base">Keluar</span>
+          </div>
         </Button>
       </div>
     </div>

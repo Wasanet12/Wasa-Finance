@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useSimpleAuth } from '@/components/simple-auth-provider';
 import { Sidebar } from '@/components/wasa/sidebar';
 import { MonthYearProvider } from '@/contexts/MonthYearContext';
@@ -15,6 +15,7 @@ export default function DashboardLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
   const { user, loading: authLoading } = useSimpleAuth();
 
   // Redirect if not authenticated
@@ -24,10 +25,11 @@ export default function DashboardLayout({
     }
   }, [user, authLoading, router]);
 
-  // Close sidebar when route changes (mobile)
+  // Close sidebar when route changes (mobile and tablet)
   useEffect(() => {
+    // Close sidebar on navigation for mobile and tablet
     setSidebarOpen(false);
-  }, [router]);
+  }, [pathname]);
 
   if (authLoading) {
     return (
@@ -46,17 +48,17 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen" style={{ backgroundColor: '#FFFFFF' }}>
-      {/* Mobile Sidebar Overlay */}
+      {/* Mobile & Tablet Sidebar Overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Mobile Sidebar */}
+      {/* Mobile & Tablet Sidebar */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out lg:hidden
+        fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out md:hidden
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `} style={{ backgroundColor: '#1B2336' }}>
         <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: '#3D4558' }}>
@@ -65,7 +67,7 @@ export default function DashboardLayout({
             variant="ghost"
             size="sm"
             onClick={() => setSidebarOpen(false)}
-            className="text-white hover:bg-gray-700"
+            className="text-white hover:text-[#1B2336] hover:bg-white hover:shadow-md transition-all duration-200"
           >
             <X className="h-5 w-5" />
           </Button>
@@ -75,20 +77,20 @@ export default function DashboardLayout({
         </div>
       </aside>
 
-      {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-64 flex-col border-r border-border" style={{ backgroundColor: '#1B2336' }}>
+      {/* Desktop & Tablet Sidebar */}
+      <aside className="hidden md:flex w-64 flex-col border-r border-border" style={{ backgroundColor: '#1B2336' }}>
         <Sidebar />
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
-        {/* Mobile Header */}
-        <div className="lg:hidden flex items-center justify-between p-4 border-b" style={{ backgroundColor: '#FFFFFF', borderColor: '#E5E7EB' }}>
+        {/* Mobile & Tablet Header */}
+        <div className="md:hidden flex items-center justify-between p-4 border-b" style={{ backgroundColor: '#FFFFFF', borderColor: '#E5E7EB' }}>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setSidebarOpen(true)}
-            className="text-gray-700 hover:bg-gray-100"
+            className="text-gray-700 hover:text-[#1B2336] hover:bg-white hover:shadow-md transition-all duration-200"
           >
             <Menu className="h-5 w-5" />
           </Button>

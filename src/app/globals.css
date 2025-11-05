@@ -163,3 +163,24 @@
     .p-responsive { padding: 2rem; }
   }
 }
+
+/* Calendar Icon White Color */
+.date-input-white::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(2);
+  cursor: pointer;
+}
+
+.date-input-white::-webkit-inner-spin-button {
+  filter: invert(1) brightness(2);
+}
+
+.date-input-white::-webkit-clear-button {
+  filter: invert(1) brightness(2);
+}
+
+/* Firefox Date Input Styling */
+.date-input-white::-moz-calendar-picker-indicator {
+  filter: invert(1) brightness(2);
+  cursor: pointer;
+  background-color: transparent;
+}

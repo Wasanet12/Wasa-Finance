@@ -155,13 +155,15 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
       <DialogTrigger asChild>
         {trigger || (
           <Button
-            className="h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm min-h-[32px] sm:min-h-[36px] transition-all duration-300"
+            className="flex items-center justify-center space-x-2 px-4 py-2 text-sm sm:text-base hover:bg-opacity-90 transition-colors"
             style={{
               backgroundColor: '#1B2336',
-              color: '#FFFFFF'
+              color: '#FFFFFF',
+              borderColor: '#3D4558',
+              minHeight: '44px', // Touch-friendly size
             }}
           >
-            <Plus className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 transition-all duration-300" style={{ color: '#FFFFFF' }} />
+            <Plus className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
             <span className="hidden sm:inline">Tambah Pelanggan</span>
             <span className="sm:hidden">Tambah</span>
           </Button>
@@ -231,16 +233,7 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
                     }}>
                       {packages.map((pkg) => (
                         <SelectItem key={pkg.id} value={pkg.name} className="text-xs sm:text-sm py-1 sm:py-2" style={{ color: '#FFFFFF' }}>
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                            <span>{pkg.name}</span>
-                            <span className="text-xs font-medium">
-                              {new Intl.NumberFormat('id-ID', {
-                                style: 'currency',
-                                currency: 'IDR',
-                                minimumFractionDigits: 0,
-                              }).format(pkg.price)}
-                            </span>
-                          </div>
+                          {pkg.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
