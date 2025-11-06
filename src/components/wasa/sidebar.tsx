@@ -97,12 +97,11 @@ export function Sidebar({ className }: SidebarProps) {
               return (
                 <Button
                   key={item.name}
-                  variant={isActive ? "secondary" : "ghost"}
                   className={cn(
                     "w-full justify-start h-10 sm:h-11 px-3 sm:px-4 rounded-lg transition-all duration-200",
                     isActive
                       ? "bg-white text-[#1B2336] shadow-sm font-semibold"
-                      : "text-muted-foreground hover:text-[#1B2336] hover:bg-white hover:shadow-md"
+                      : "custom-btn"
                   )}
                   asChild
                 >
@@ -119,8 +118,7 @@ export function Sidebar({ className }: SidebarProps) {
 
       <div className="px-2 sm:px-4 py-3 sm:py-4 border-t border-border">
         <Button
-          variant="ghost"
-          className="w-full justify-start h-10 sm:h-11 px-3 sm:px-4 text-muted-foreground hover:text-[#1B2336] hover:bg-white hover:shadow-md rounded-lg transition-all duration-200"
+          className="w-full justify-start h-10 sm:h-11 px-3 sm:px-4 custom-btn rounded-lg transition-all duration-200"
           onClick={handleLogout}
         >
           <div className="flex items-center">

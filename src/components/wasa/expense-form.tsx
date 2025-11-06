@@ -104,11 +104,8 @@ export function ExpenseForm({ expense, onSuccess, trigger }: ExpenseFormProps) {
       <DialogTrigger asChild>
         {trigger || (
           <Button
-            className="flex items-center justify-center space-x-2 px-4 py-2 text-sm sm:text-base hover:bg-opacity-90 transition-colors"
+            className="flex items-center justify-center space-x-2 px-4 py-2 text-sm sm:text-base custom-btn"
             style={{
-              backgroundColor: '#1B2336',
-              color: '#FFFFFF',
-              borderColor: '#3D4558',
               minHeight: '44px', // Touch-friendly size
             }}
           >
@@ -218,11 +215,7 @@ export function ExpenseForm({ expense, onSuccess, trigger }: ExpenseFormProps) {
                   <FormLabel style={{ color: '#FFFFFF' }}>Kategori</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger style={{
-                        backgroundColor: '#2D3548',
-                        color: '#FFFFFF',
-                        borderColor: '#3D4558'
-                      }}>
+                      <SelectTrigger className="custom-select">
                         <SelectValue placeholder="Pilih kategori" style={{ color: '#FFFFFF' }} />
                       </SelectTrigger>
                     </FormControl>
@@ -230,11 +223,11 @@ export function ExpenseForm({ expense, onSuccess, trigger }: ExpenseFormProps) {
                       backgroundColor: '#1B2336',
                       borderColor: '#3D4558'
                     }}>
-                      <SelectItem value="Operasional" style={{ color: '#FFFFFF' }}>Operasional</SelectItem>
-                      <SelectItem value="Marketing" style={{ color: '#FFFFFF' }}>Marketing</SelectItem>
-                      <SelectItem value="Infrastruktur" style={{ color: '#FFFFFF' }}>Infrastruktur</SelectItem>
-                      <SelectItem value="Gaji" style={{ color: '#FFFFFF' }}>Gaji</SelectItem>
-                      <SelectItem value="Lainnya" style={{ color: '#FFFFFF' }}>Lainnya</SelectItem>
+                      <SelectItem value="Operasional" className="custom-select-item">Operasional</SelectItem>
+                      <SelectItem value="Marketing" className="custom-select-item">Marketing</SelectItem>
+                      <SelectItem value="Infrastruktur" className="custom-select-item">Infrastruktur</SelectItem>
+                      <SelectItem value="Gaji" className="custom-select-item">Gaji</SelectItem>
+                      <SelectItem value="Lainnya" className="custom-select-item">Lainnya</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage style={{ color: '#FFFFFF' }} />
@@ -248,20 +241,16 @@ export function ExpenseForm({ expense, onSuccess, trigger }: ExpenseFormProps) {
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
-                style={{
-                  backgroundColor: 'transparent',
-                  color: '#FFFFFF',
-                  borderColor: '#3D4558'
-                }}
+                className="custom-btn"
               >
                 Batal
               </Button>
               <Button
                 type="submit"
                 disabled={loading}
+                className="custom-btn"
                 style={{
-                  backgroundColor: '#10B981',
-                  color: '#FFFFFF'
+                  backgroundColor: '#10B981'
                 }}
               >
                 {loading ? 'Menyimpan...' : 'Simpan'}

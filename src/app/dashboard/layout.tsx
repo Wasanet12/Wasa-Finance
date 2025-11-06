@@ -64,10 +64,10 @@ export default function DashboardLayout({
         <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: '#3D4558' }}>
           <h2 className="text-lg font-semibold" style={{ color: '#FFFFFF' }}>Wasa Finance</h2>
           <Button
-            variant="ghost"
             size="sm"
             onClick={() => setSidebarOpen(false)}
-            className="text-white hover:text-[#1B2336] hover:bg-white hover:shadow-md transition-all duration-200"
+            className="custom-btn transition-all duration-200"
+            style={{ backgroundColor: 'transparent', color: '#FFFFFF' }}
           >
             <X className="h-5 w-5" />
           </Button>
@@ -87,10 +87,10 @@ export default function DashboardLayout({
         {/* Mobile & Tablet Header */}
         <div className="md:hidden flex items-center justify-between p-4 border-b" style={{ backgroundColor: '#FFFFFF', borderColor: '#E5E7EB' }}>
           <Button
-            variant="ghost"
             size="sm"
             onClick={() => setSidebarOpen(true)}
-            className="text-gray-700 hover:text-[#1B2336] hover:bg-white hover:shadow-md transition-all duration-200"
+            className="custom-btn transition-all duration-200"
+            style={{ backgroundColor: 'transparent', color: '#6B7280' }}
           >
             <Menu className="h-5 w-5" />
           </Button>

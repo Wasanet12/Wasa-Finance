@@ -26,18 +26,43 @@ import {
 import { PackageForm } from '@/components/wasa/package-form';
 import { services } from '@/lib/firestore';
 import { Package } from '@/lib/types';
-import { formatDate } from '@/utils/dateUtils';
-import { Search, Edit, Trash2, Package as PackageIcon } from 'lucide-react';
+import { formatDate, toDate } from '@/utils/dateUtils';
+import { Search, Edit, Trash2, Package as PackageIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function PackagesPage() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [filteredPackages, setFilteredPackages] = useState<Package[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   useEffect(() => {
     fetchPackages();
   }, []);
+
+  // Responsive pagination - set items per page based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window !== 'undefined') {
+        setItemsPerPage(window.innerWidth < 768 ? 5 : 10);
+      }
+    };
+
+    // Set initial value
+    handleResize();
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Reset to page 1 when filtered packages change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filteredPackages]);
 
   useEffect(() => {
     const filtered = packages.filter(pkg =>
@@ -50,7 +75,16 @@ export default function PackagesPage() {
     try {
       const response = await services.package.getActive();
       if (response.success && response.data) {
-        setPackages(response.data);
+        // Sort packages by createdAt descending (newest first)
+        const sortedPackages = response.data.sort((a, b) => {
+          const dateA = toDate(a.createdAt);
+          const dateB = toDate(b.createdAt);
+          if (dateA && dateB) {
+            return dateB.getTime() - dateA.getTime();
+          }
+          return 0;
+        });
+        setPackages(sortedPackages);
       } else {
         console.error('Failed to fetch packages:', response.error);
         setPackages([]);
@@ -75,6 +109,16 @@ export default function PackagesPage() {
       console.error('Error deleting package:', error);
     }
   };
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredPackages.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredPackages.length / itemsPerPage);
+
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  const goToPreviousPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
+  const goToNextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -189,19 +233,19 @@ export default function PackagesPage() {
             </div>
           </div>
 
-          <div className="rounded-md border" style={{ borderColor: '#3D4558' }}>
+          <div className="rounded-lg border table-container-rounded" style={{ borderColor: '#3D4558', borderRadius: '0.5rem', overflow: 'hidden' }}>
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead style={{ color: '#FFFFFF' }}>Nama Paket</TableHead>
-                  <TableHead style={{ color: '#FFFFFF' }}>Harga</TableHead>
-                  <TableHead style={{ color: '#FFFFFF' }}>Tanggal Dibuat</TableHead>
-                  <TableHead className="text-right" style={{ color: '#FFFFFF' }}>Aksi</TableHead>
+              <TableHeader className="table-header-white">
+                <TableRow className="table-row-hover">
+                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Nama Paket</TableHead>
+                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Harga</TableHead>
+                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Tanggal Dibuat</TableHead>
+                  <TableHead className="text-right" style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredPackages.length === 0 ? (
-                  <TableRow>
+                  <TableRow className="table-row-hover">
                     <TableCell colSpan={4} className="text-center py-8" style={{ color: '#FFFFFF' }}>
                       {searchTerm
                         ? 'Tidak ada paket yang cocok dengan pencarian.'
@@ -209,8 +253,8 @@ export default function PackagesPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredPackages.map((pkg) => (
-                    <TableRow key={pkg.id}>
+                  currentItems.map((pkg) => (
+                    <TableRow key={pkg.id} className="table-row-hover">
                       <TableCell className="font-medium" style={{ color: '#FFFFFF' }}>{pkg.name}</TableCell>
                       <TableCell className="font-semibold" style={{ color: '#FFFFFF' }}>
                         {formatCurrency(pkg.price)}
@@ -222,14 +266,14 @@ export default function PackagesPage() {
                             pkg={pkg}
                             onSuccess={fetchPackages}
                             trigger={
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" className="custom-btn">
                                 <Edit className="h-4 w-4" />
                               </Button>
                             }
                           />
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" className="custom-btn">
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </AlertDialogTrigger>
@@ -242,17 +286,11 @@ export default function PackagesPage() {
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel style={{
-                                  backgroundColor: 'transparent',
-                                  color: '#FFFFFF',
-                                  borderColor: '#3D4558'
-                                }}>Batal</AlertDialogCancel>
+                                <AlertDialogCancel>Batal</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => handleDeletePackage(pkg.id!)}
-                                  style={{
-                                    backgroundColor: '#3D4558',
-                                    color: '#FFFFFF'
-                                  }}
+                                  className="custom-btn"
+                                  style={{ backgroundColor: '#EF4444' }}
                                 >
                                   Hapus
                                 </AlertDialogAction>
@@ -269,6 +307,69 @@ export default function PackagesPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Pagination Component */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-4 px-4">
+          <div className="text-sm text-gray-300">
+            Menampilkan {indexOfFirstItem + 1} hingga {Math.min(indexOfLastItem, filteredPackages.length)} dari {filteredPackages.length} paket
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Button
+              onClick={goToPreviousPage}
+              disabled={currentPage === 1}
+              className="custom-btn px-3 py-1"
+              variant="outline"
+              size="sm"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+
+            <div className="flex items-center space-x-1">
+              {/* Page numbers */}
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNumber;
+                if (totalPages <= 5) {
+                  pageNumber = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNumber = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNumber = totalPages - 4 + i;
+                } else {
+                  pageNumber = currentPage - 2 + i;
+                }
+
+                return (
+                  <Button
+                    key={pageNumber}
+                    onClick={() => paginate(pageNumber)}
+                    className={`custom-btn px-3 py-1 text-sm ${
+                      currentPage === pageNumber
+                        ? 'ring-2 ring-blue-500'
+                        : ''
+                    }`}
+                    variant={currentPage === pageNumber ? 'default' : 'outline'}
+                    size="sm"
+                  >
+                    {pageNumber}
+                  </Button>
+                );
+              })}
+            </div>
+
+            <Button
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+              className="custom-btn px-3 py-1"
+              variant="outline"
+              size="sm"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

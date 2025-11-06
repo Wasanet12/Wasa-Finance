@@ -94,11 +94,8 @@ export function PackageForm({ pkg, onSuccess, trigger }: PackageFormProps) {
       <DialogTrigger asChild>
         {trigger || (
           <Button
-            className="flex items-center justify-center space-x-2 px-4 py-2 text-sm sm:text-base hover:bg-opacity-90 transition-colors"
+            className="flex items-center justify-center space-x-2 px-4 py-2 text-sm sm:text-base custom-btn"
             style={{
-              backgroundColor: '#1B2336',
-              color: '#FFFFFF',
-              borderColor: '#3D4558',
               minHeight: '44px', // Touch-friendly size
             }}
           >
@@ -214,20 +211,16 @@ export function PackageForm({ pkg, onSuccess, trigger }: PackageFormProps) {
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
-                style={{
-                  backgroundColor: 'transparent',
-                  color: '#FFFFFF',
-                  borderColor: '#3D4558'
-                }}
+                className="custom-btn"
               >
                 Batal
               </Button>
               <Button
                 type="submit"
                 disabled={loading}
+                className="custom-btn"
                 style={{
-                  backgroundColor: '#10B981',
-                  color: '#FFFFFF'
+                  backgroundColor: '#10B981'
                 }}
               >
                 {loading ? 'Menyimpan...' : 'Simpan'}

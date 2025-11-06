@@ -203,30 +203,23 @@ export default function DashboardPage() {
 
   const fetchData = async () => {
     try {
-      console.log('Fetching data from Firebase...');
       const [customersResponse, expensesResponse] = await Promise.all([
         services.customer.getAll(),
         services.expense.getAll()
       ]);
 
       if (customersResponse.success && customersResponse.data) {
-        console.log('Customers fetched:', customersResponse.data.length, customersResponse.data);
         setCustomers(customersResponse.data);
       } else {
-        console.error('Error fetching customers:', customersResponse.error);
         setCustomers([]);
       }
 
       if (expensesResponse.success && expensesResponse.data) {
-        console.log('Expenses fetched:', expensesResponse.data.length, expensesResponse.data);
         setExpenses(expensesResponse.data);
       } else {
-        console.error('Error fetching expenses:', expensesResponse.error);
         setExpenses([]);
       }
     } catch (error) {
-      console.error('Error fetching data:', error);
-      // Set empty data on error to prevent undefined errors
       setCustomers([]);
       setExpenses([]);
     }
@@ -257,17 +250,12 @@ export default function DashboardPage() {
   };
 
   const calculateMetrics = () => {
-    console.log('Calculating metrics...');
-    console.log('Current customers count:', customers.length);
-    console.log('Current expenses count:', expenses.length);
-    console.log('Selected month:', selectedMonth, 'Selected year:', selectedYear);
 
     // Get filtered data
     const { filteredCustomers, filteredExpenses } = getFilteredData();
 
     // If no data, return zeros
     if (!customers.length && !expenses.length) {
-      console.log('No data available, setting all metrics to zero');
       setMetrics({
         totalRevenue: 0,
         totalRevenueBeforeDiscount: 0,
@@ -316,47 +304,31 @@ export default function DashboardPage() {
 
     // 4. Calculate profit splits (based on package prices, not after discount)
     const wasaProfit = (wasaRevenue * 0.4) + (officeRevenue * 0.4); // Wasa gets 40% from all customers
-    const officeProfit = (wasaRevenue * 0.6) + (officeRevenue * 0.6); // Office gets 60% from all customers
+    const officeProfitBeforeDiscount = (wasaRevenue * 0.6) + (officeRevenue * 0.6); // Office gets 60% from all customers
 
     // For compatibility with interface - profit before discount (same as profit in new logic)
     const wasaProfitBeforeDiscount = wasaProfit; // In new logic, profit is always calculated from package prices
 
-    // 5. Calculate total discount (only from Wasa customers, since they bear the discount cost)
-    const wasaTotalDiscount = customersPayToWasa
-      .reduce((sum, customer) => sum + (customer.discountAmount || 0), 0);
-
-    const totalDiscount = filteredCustomers
+    // 5. Calculate total discount (now borne by the office)
+    const officeTotalDiscount = filteredCustomers
       .filter(customer => customer.status === 'active')
       .reduce((sum, customer) => sum + (customer.discountAmount || 0), 0);
+
+    const totalDiscount = officeTotalDiscount; // All discount now borne by office
 
     // 6. Calculate total expenses
     const totalExpenses = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
 
-    // 7. Calculate net profit (wasa profit minus expenses minus discount cost)
-    // Important: Discount reduces wasa's net profit, not office profit
-    const wasaNetProfitBeforeDiscount = wasaProfit - totalExpenses;
-    const wasaNetProfitAfterDiscount = wasaNetProfitBeforeDiscount - wasaTotalDiscount;
+    // 7. Calculate net profit (wasa profit minus expenses, office profit minus discount)
+    // Important: Discount reduces office's profit, not wasa's profit
+    const wasaNetProfit = wasaProfit - totalExpenses; // Wasa profit bersih tanpa potongan diskon
+    const officeProfitAfterDiscount = officeProfitBeforeDiscount - officeTotalDiscount; // Office profit setelah dikurangi diskon
 
-    // Debug: Log semua nilai penting
-    console.log('=== DEBUG DASHBOARD CALCULATIONS ===');
-    console.log('Filtered customers:', filteredCustomers.length);
-    console.log('Customers Pay to Wasa:', customersPayToWasa.length);
-    console.log('Customers Pay to Office:', customersPayToOffice.length);
-    console.log('Wasa Revenue:', wasaRevenue);
-    console.log('Office Revenue:', officeRevenue);
-    console.log('Wasa Profit:', wasaProfit);
-    console.log('Total Expenses:', totalExpenses);
-    console.log('Wasa Total Discount (only from Wasa customers):', wasaTotalDiscount);
-    console.log('Total Discount (all customers):', totalDiscount);
-    console.log('Wasa Net Profit Before Discount:', wasaNetProfitBeforeDiscount);
-    console.log('Wasa Net Profit After Discount:', wasaNetProfitAfterDiscount);
-    console.log('Expected net profit difference:', wasaTotalDiscount);
-    console.log('Actual net profit difference:', wasaNetProfitBeforeDiscount - wasaNetProfitAfterDiscount);
-    console.log('=== END DEBUG ===');
+    // For compatibility, update the profit values
+    const officeProfit = officeProfitAfterDiscount; // Use after-discount profit for display
 
-    // 8. Calculate revenue after discount
-    // Office revenue unchanged, Wasa revenue reduced by discount
-
+    
+    
     // Count customers by payment target (handle missing paymentTarget field)
     const customersPayToWasaCount = filteredCustomers.filter(
       customer => customer.status === 'active' && (customer.paymentTarget === 'Wasa' || !customer.paymentTarget)
@@ -376,19 +348,7 @@ export default function DashboardPage() {
       .filter(customer => customer.status === 'active' && customer.paymentTarget === 'Kantor')
       .reduce((sum, customer) => sum + customer.packagePrice, 0);
 
-    // Debug payment target counts
-    console.log('=== Payment Target Debug ===');
-    console.log('Total filtered customers:', filteredCustomers.length);
-    console.log('Filtered customers:', filteredCustomers.map(c => ({
-      name: c.name,
-      status: c.status,
-      paymentTarget: c.paymentTarget
-    })));
-    console.log('Active + Wasa customers:', filteredCustomers.filter(c => c.status === 'active' && c.paymentTarget === 'Wasa').length);
-    console.log('Active + Kantor customers:', filteredCustomers.filter(c => c.status === 'active' && c.paymentTarget === 'Kantor').length);
-    console.log('All payment targets:', filteredCustomers.map(c => c.paymentTarget));
-    console.log('All statuses:', filteredCustomers.map(c => c.status));
-
+    
     // Count all active customers (not 'inactive')
     const totalActiveCustomers = customers.filter(customer => customer.status !== 'inactive').length;
 
@@ -401,10 +361,10 @@ export default function DashboardPage() {
       totalRevenueBeforeDiscount,
       wasaProfit,
       wasaProfitBeforeDiscount,
-      officeProfit,
+      officeProfit: officeProfitAfterDiscount, // Use after-discount office profit
       totalExpenses,
-      wasaNetProfit: wasaNetProfitAfterDiscount, // Use after-discount net profit
-      wasaNetProfitBeforeDiscount,
+      wasaNetProfit, // Wasa profit without discount burden
+      wasaNetProfitBeforeDiscount: wasaNetProfit, // Same as wasaNetProfit (no discount)
       totalDiscount,
       customersPayToWasa: customersPayToWasaCount,
       customersPayToOffice: customersPayToOfficeCount,
@@ -415,10 +375,7 @@ export default function DashboardPage() {
       totalPaymentToOffice,
     };
 
-    console.log('Final metrics calculated:', finalMetrics);
     setMetrics(finalMetrics);
-
-    // Calculate comparison metrics after current metrics are set
     calculateComparisonMetrics(finalMetrics);
   };
 
@@ -486,9 +443,8 @@ export default function DashboardPage() {
 
     try {
       generatePDFReport(pdfData);
-      console.log('PDF report generated successfully');
     } catch (error) {
-      console.error('Error generating PDF report:', error);
+      // Handle PDF generation error
     }
   };
 
@@ -510,13 +466,10 @@ export default function DashboardPage() {
           {/* Download Button - Responsive */}
           <Button
             onClick={handleDownloadPDF}
+            className="flex items-center justify-center space-x-2 px-4 py-2 text-sm sm:text-base w-full sm:w-auto custom-btn"
             style={{
-              backgroundColor: '#1B2336',
-              color: '#FFFFFF',
-              borderColor: '#3D4558',
               minHeight: '44px', // Touch-friendly size
             }}
-            className="flex items-center justify-center space-x-2 px-4 py-2 text-sm sm:text-base w-full sm:w-auto hover:bg-opacity-90 transition-colors"
           >
             <Download className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
             <span className="hidden sm:inline">Download PDF</span>
@@ -526,10 +479,8 @@ export default function DashboardPage() {
           {/* Month Selector - Responsive */}
           <Select value={selectedMonth.toString()} onValueChange={(value) => handleMonthChange(parseInt(value))}>
             <SelectTrigger
-              className="w-full sm:w-40 min-h-[44px]"
+              className="w-full sm:w-40 min-h-[44px] custom-select"
               style={{
-                backgroundColor: '#1B2336',
-                color: '#FFFFFF',
                 borderColor: '#3D4558',
                 fontSize: '14px'
               }}
@@ -541,7 +492,8 @@ export default function DashboardPage() {
                 <SelectItem
                   key={month}
                   value={(index + 1).toString()}
-                  style={{ color: '#FFFFFF', fontSize: '14px' }}
+                  className="custom-select-item"
+                  style={{ fontSize: '14px' }}
                 >
                   {month}
                 </SelectItem>
@@ -555,7 +507,7 @@ export default function DashboardPage() {
               variant="ghost"
               size="sm"
               onClick={() => setSelectedYear(Math.max(2020, selectedYear - 1))}
-              className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-800 rounded-l-lg"
+              className="h-8 w-8 p-0 text-gray-400 rounded-l-lg custom-btn"
               disabled={selectedYear <= 2020}
             >
               <ChevronLeft className="h-4 w-4" />
@@ -588,7 +540,7 @@ export default function DashboardPage() {
               variant="ghost"
               size="sm"
               onClick={() => setSelectedYear(Math.min(2030, selectedYear + 1))}
-              className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-800 rounded-r-lg"
+              className="h-8 w-8 p-0 text-gray-400 rounded-r-lg custom-btn"
               disabled={selectedYear >= 2030}
             >
               <ChevronRight className="h-4 w-4" />
@@ -600,7 +552,7 @@ export default function DashboardPage() {
       {/* Financial Metrics - Responsive */}
       <div className="px-3 sm:px-4 lg:px-6">
         <div className="grid gap-3 sm:gap-4 lg:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          <Card className="border-border shadow-lg hover:shadow-xl transition-shadow" style={{ backgroundColor: '#1B2336' }}>
+          <Card className="border-border shadow-lg transition-shadow" style={{ backgroundColor: '#1B2336' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
               <CardTitle className="text-xs sm:text-sm font-medium leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
                 Total Pendapatan Kotor
@@ -614,7 +566,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-border shadow-lg hover:shadow-xl transition-shadow" style={{ backgroundColor: '#1B2336' }}>
+          <Card className="border-border shadow-lg transition-shadow" style={{ backgroundColor: '#1B2336' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
               <CardTitle className="text-xs sm:text-sm font-medium leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
                 Laba Wasa (40%)
@@ -628,7 +580,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-border shadow-lg hover:shadow-xl transition-shadow" style={{ backgroundColor: '#1B2336' }}>
+          <Card className="border-border shadow-lg transition-shadow" style={{ backgroundColor: '#1B2336' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
               <CardTitle className="text-xs sm:text-sm font-medium leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
                 Laba Kantor (60%)
@@ -636,13 +588,23 @@ export default function DashboardPage() {
               <Building2 className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 transition-all duration-300" style={{ color: '#FFFFFF' }} />
             </CardHeader>
             <CardContent className="px-3 sm:px-4 pb-4 sm:pb-5">
+              <div className="text-xs space-y-1 mb-2">
+                <div className="flex justify-between">
+                  <span style={{ color: '#FFFFFF' }}>Total:</span>
+                  <span className="text-gray-300">{formatCurrency(metrics.totalPaymentToWasa * 0.6 + metrics.totalPaymentToOffice * 0.6)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: '#FFFFFF' }}>Diskon:</span>
+                  <span className="text-red-400">-{formatCurrency(metrics.totalDiscount)}</span>
+                </div>
+              </div>
               <div className="text-base sm:text-lg md:text-xl font-bold truncate leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
                 {formatCurrency(metrics.officeProfit)}
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-border shadow-lg hover:shadow-xl transition-shadow" style={{ backgroundColor: '#1B2336' }}>
+          <Card className="border-border shadow-lg transition-shadow" style={{ backgroundColor: '#1B2336' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
               <CardTitle className="text-xs sm:text-sm font-medium leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
                 Total Biaya Operasional
@@ -661,55 +623,31 @@ export default function DashboardPage() {
       {/* Net Profit and Payment Metrics - Responsive */}
       <div className="px-3 sm:px-4 lg:px-6">
         <div className="grid gap-3 sm:gap-4 lg:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          <Card className="border-border shadow-lg hover:shadow-xl transition-shadow" style={{ backgroundColor: '#1B2336' }}>
+          <Card className="border-border shadow-lg transition-shadow" style={{ backgroundColor: '#1B2336' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
               <CardTitle className="text-xs sm:text-sm font-medium leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
-                Keuntungan Bersih Wasa
+                Keuntungan Wasa
               </CardTitle>
               <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 transition-all duration-300" style={{ color: '#FFFFFF' }} />
             </CardHeader>
             <CardContent className="px-3 sm:px-4 pb-4 sm:pb-5">
-              {(metrics.totalDiscount > 0 || metrics.wasaNetProfitBeforeDiscount !== metrics.wasaNetProfit) ? (
-                <>
-                  <div className="space-y-1">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-medium transition-all duration-300" style={{ color: '#FFFFFF' }}>
-                        Sebelum diskon:
-                      </span>
-                      <span className="text-xs truncate transition-all duration-300" style={{ color: '#FFFFFF' }}>
-                        {formatCurrency(metrics.wasaNetProfitBeforeDiscount)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-medium transition-all duration-300" style={{ color: '#FFFFFF' }}>
-                        Sesudah diskon:
-                      </span>
-                      <span className="text-xs truncate font-medium transition-all duration-300" style={{ color: '#FFFFFF' }}>
-                        {formatCurrency(metrics.wasaNetProfit)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-medium transition-all duration-300" style={{ color: '#FFFFFF' }}>
-                        Diskon Wasa:
-                      </span>
-                      <span className="text-xs truncate transition-all duration-300" style={{ color: '#FFFFFF' }}>
-                        {formatCurrency(metrics.wasaNetProfitBeforeDiscount - metrics.wasaNetProfit)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-base sm:text-lg md:text-xl font-bold truncate mt-2 leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
-                    {formatCurrency(metrics.wasaNetProfit)}
-                  </div>
-                </>
-              ) : (
-                <div className="text-base sm:text-lg md:text-xl font-bold truncate leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
-                  {formatCurrency(metrics.wasaNetProfit)}
+              <div className="text-xs space-y-1 mb-2">
+                <div className="flex justify-between">
+                  <span style={{ color: '#FFFFFF' }}>Laba (40%):</span>
+                  <span className="text-gray-300">{formatCurrency(metrics.wasaProfit)}</span>
                 </div>
-              )}
+                <div className="flex justify-between">
+                  <span style={{ color: '#FFFFFF' }}>Operasional:</span>
+                  <span className="text-red-400">-{formatCurrency(metrics.totalExpenses)}</span>
+                </div>
+              </div>
+              <div className="text-base sm:text-lg md:text-xl font-bold truncate leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
+                {formatCurrency(metrics.wasaNetProfit)}
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="border-border shadow-lg hover:shadow-xl transition-shadow" style={{ backgroundColor: '#1B2336' }}>
+          <Card className="border-border shadow-lg transition-shadow" style={{ backgroundColor: '#1B2336' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
               <CardTitle className="text-xs sm:text-sm font-medium leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
                 Pelanggan Bayar ke Wasa
@@ -723,16 +661,10 @@ export default function DashboardPage() {
               <p className="text-xs mt-1 leading-snug truncate transition-all duration-300" style={{ color: '#FFFFFF' }}>
                 Total: {formatCurrency(metrics.totalPaymentToWasa)}
               </p>
-              <p className="text-xs mt-1 leading-snug truncate transition-all duration-300" style={{ color: '#FFFFFF' }}>
-                ⚠️ Kantor (60%): {formatCurrency(metrics.totalPaymentToWasa * 0.6)}
-              </p>
-              <p className="text-xs mt-1 leading-snug truncate transition-all duration-300" style={{ color: '#FFFFFF' }}>
-                ✅ Wasa (40%): {formatCurrency(metrics.totalPaymentToWasa * 0.4)}
-              </p>
-                    </CardContent>
+            </CardContent>
           </Card>
 
-          <Card className="border-border shadow-lg hover:shadow-xl transition-shadow" style={{ backgroundColor: '#1B2336' }}>
+          <Card className="border-border shadow-lg transition-shadow" style={{ backgroundColor: '#1B2336' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
               <CardTitle className="text-xs sm:text-sm font-medium leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
                 Pelanggan Bayar ke Kantor
@@ -746,16 +678,10 @@ export default function DashboardPage() {
               <p className="text-xs mt-1 leading-snug truncate transition-all duration-300" style={{ color: '#FFFFFF' }}>
                 Total: {formatCurrency(metrics.totalPaymentToOffice)}
               </p>
-              <p className="text-xs mt-1 leading-snug truncate transition-all duration-300" style={{ color: '#FFFFFF' }}>
-                💵 Wasa (40%): {formatCurrency(metrics.totalPaymentToOffice * 0.4)}
-              </p>
-              <p className="text-xs mt-1 leading-snug truncate transition-all duration-300" style={{ color: '#FFFFFF' }}>
-                ✅ Kantor (60%): {formatCurrency(metrics.totalPaymentToOffice * 0.6)}
-              </p>
-                          </CardContent>
+                                </CardContent>
           </Card>
 
-          <Card className="border-border shadow-lg hover:shadow-xl transition-shadow" style={{ backgroundColor: '#1B2336' }}>
+          <Card className="border-border shadow-lg transition-shadow" style={{ backgroundColor: '#1B2336' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
               <CardTitle className="text-xs sm:text-sm font-medium leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
                 Total Pelanggan Aktif
@@ -769,12 +695,12 @@ export default function DashboardPage() {
               <p className="text-xs mt-1 leading-snug truncate transition-all duration-300" style={{ color: '#FFFFFF' }}>
                 {metrics.unpaidCustomers > 0 && (
                   <span className="text-white">
-                    ⚠️ {metrics.unpaidCustomers} non-aktif
+                    {metrics.unpaidCustomers} non-aktif
                   </span>
                 )}
                 {metrics.unpaidCustomers === 0 && (
                   <span className="text-white">
-                    ✅ Semua pelanggan aktif
+                    Semua pelanggan aktif
                   </span>
                 )}
               </p>
@@ -787,7 +713,7 @@ export default function DashboardPage() {
       <div className="px-2 sm:px-4 space-y-3 sm:space-y-6">
         {/* Comparison Metrics Table */}
         {selectedMonth !== 0 && (
-          <Card className="border-border shadow-lg hover:shadow-xl transition-shadow" style={{ backgroundColor: '#1B2336' }}>
+          <Card className="border-border shadow-lg transition-shadow" style={{ backgroundColor: '#1B2336' }}>
             <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
               <CardTitle className="flex items-center space-x-2 sm:space-x-3" style={{ color: '#FFFFFF' }}>
                 <div className="p-2 rounded-lg transition-all duration-300" style={{ backgroundColor: '#10B98120' }}>
@@ -801,16 +727,16 @@ export default function DashboardPage() {
                 <div className="overflow-x-auto scrollbar-hide">
                   <div className="min-w-[640px]">
                     <UITable>
-                <TableHeader>
-                    <TableRow style={{ backgroundColor: '#1E293B' }}>
-                      <TableHead className="py-2 px-2 sm:py-3 sm:px-3 text-xs sm:text-sm font-semibold uppercase tracking-wider leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>Metrik</TableHead>
-                      <TableHead className="py-2 px-2 sm:py-3 sm:px-3 text-xs sm:text-sm font-semibold uppercase tracking-wider text-right leading-snug transition-all duration-300" style={{ color: '#FFFFFF' }}>Bulan Ini</TableHead>
-                      <TableHead className="py-2 px-2 sm:py-3 sm:px-3 text-xs sm:text-sm font-semibold uppercase tracking-wider text-right leading-snug transition-all duration-300" style={{ color: '#FFFFFF' }}>Perubahan</TableHead>
-                      <TableHead className="py-2 px-2 sm:py-3 sm:px-3 text-xs sm:text-sm font-semibold uppercase tracking-wider text-right leading-snug transition-all duration-300" style={{ color: '#FFFFFF' }}>Persentase</TableHead>
+                <TableHeader className="table-header-white">
+                    <TableRow className="table-row-hover-dark" style={{ backgroundColor: '#1E293B' }}>
+                      <TableHead className="py-2 px-2 sm:py-3 sm:px-3 text-xs sm:text-sm font-semibold uppercase tracking-wider leading-tight transition-all duration-300" style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Metrik</TableHead>
+                      <TableHead className="py-2 px-2 sm:py-3 sm:px-3 text-xs sm:text-sm font-semibold uppercase tracking-wider text-right leading-snug transition-all duration-300" style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Bulan Ini</TableHead>
+                      <TableHead className="py-2 px-2 sm:py-3 sm:px-3 text-xs sm:text-sm font-semibold uppercase tracking-wider text-right leading-snug transition-all duration-300" style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Perubahan</TableHead>
+                      <TableHead className="py-2 px-2 sm:py-3 sm:px-3 text-xs sm:text-sm font-semibold uppercase tracking-wider text-right leading-snug transition-all duration-300" style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Persentase</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                <TableRow className="border-b" style={{ borderColor: '#1E293B' }}>
+                <TableRow className="border-b table-row-hover" style={{ borderColor: '#1E293B' }}>
                     <TableCell className="py-2 px-2 sm:py-3 sm:px-3 font-medium text-xs sm:text-sm transition-all duration-300" style={{ color: '#FFFFFF' }}>
                       <div className="flex items-center space-x-2 sm:space-x-3">
                         <div className="w-2 h-2 rounded-full transition-all duration-300" style={{ backgroundColor: '#10B981' }}></div>
@@ -827,7 +753,7 @@ export default function DashboardPage() {
                       {getChangeIndicator(comparisonMetrics.revenueChange, comparisonMetrics.revenueChangePercent)}
                     </TableCell>
                   </TableRow>
-                <TableRow className="border-b" style={{ borderColor: '#1E293B' }}>
+                <TableRow className="border-b table-row-hover" style={{ borderColor: '#1E293B' }}>
                     <TableCell className="py-2.5 px-2 sm:py-4 sm:px-5 font-medium" style={{ color: '#FFFFFF' }}>
                       <div className="flex items-center space-x-1 sm:space-x-2">
                         <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#EF4444' }}></div>
@@ -844,7 +770,7 @@ export default function DashboardPage() {
                       {getChangeIndicator(comparisonMetrics.expensesChange, comparisonMetrics.expensesChangePercent)}
                     </TableCell>
                   </TableRow>
-                <TableRow className="border-b" style={{ borderColor: '#1E293B' }}>
+                <TableRow className="border-b table-row-hover" style={{ borderColor: '#1E293B' }}>
                     <TableCell className="py-2.5 px-2 sm:py-4 sm:px-5 font-medium" style={{ color: '#FFFFFF' }}>
                       <div className="flex items-center space-x-1 sm:space-x-2">
                         <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#3B82F6' }}></div>
@@ -863,15 +789,15 @@ export default function DashboardPage() {
                       </div>
                     </TableCell>
                   </TableRow>
-                <TableRow className="border-b" style={{ borderColor: '#1E293B' }}>
+                <TableRow className="border-b table-row-hover" style={{ borderColor: '#1E293B' }}>
                     <TableCell className="py-2.5 px-2 sm:py-4 sm:px-5 font-medium" style={{ color: '#FFFFFF' }}>
                       <div className="flex items-center space-x-1 sm:space-x-2">
                         <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#6B7280' }}></div>
-                        <span>Laba Wasa Net (Sebelum Diskon)</span>
+                        <span>Laba Wasa Net (Tanpa Beban Diskon)</span>
                       </div>
                     </TableCell>
                     <TableCell className="py-2.5 px-2 sm:py-4 sm:px-5 text-right font-semibold" style={{ color: '#FFFFFF' }}>
-                      {formatCurrency(metrics.wasaNetProfitBeforeDiscount)}
+                      {formatCurrency(metrics.wasaNetProfit)}
                     </TableCell>
                     <TableCell className="py-2.5 px-2 sm:py-4 sm:px-5 text-right" style={{ color: '#FFFFFF', fontSize: '12px' }}>
                       -
@@ -882,15 +808,15 @@ export default function DashboardPage() {
                       </div>
                     </TableCell>
                   </TableRow>
-                <TableRow className="border-b" style={{ borderColor: '#1E293B' }}>
+                <TableRow className="border-b table-row-hover" style={{ borderColor: '#1E293B' }}>
                     <TableCell className="py-2.5 px-2 sm:py-4 sm:px-5 font-medium" style={{ color: '#FFFFFF' }}>
                       <div className="flex items-center space-x-1 sm:space-x-2">
                         <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#F59E0B' }}></div>
-                        <span>Beban Diskon Wasa</span>
+                        <span>Beban Diskon Kantor</span>
                       </div>
                     </TableCell>
                     <TableCell className="py-2.5 px-2 sm:py-4 sm:px-5 text-right font-semibold" style={{ color: '#FFFFFF' }}>
-                      {formatCurrency(metrics.wasaNetProfitBeforeDiscount - metrics.wasaNetProfit)}
+                      {formatCurrency(metrics.totalDiscount)}
                     </TableCell>
                     <TableCell className="py-2.5 px-2 sm:py-4 sm:px-5 text-right" style={{ color: '#FFFFFF', fontSize: '12px' }}>
                       -
@@ -901,15 +827,15 @@ export default function DashboardPage() {
                       </div>
                     </TableCell>
                   </TableRow>
-                <TableRow className="border-b" style={{ borderColor: '#1E293B' }}>
+                <TableRow className="border-b table-row-hover" style={{ borderColor: '#1E293B' }}>
                     <TableCell className="py-2.5 px-2 sm:py-4 sm:px-5 font-medium" style={{ color: '#FFFFFF' }}>
                       <div className="flex items-center space-x-1 sm:space-x-2">
                         <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#8B5CF6' }}></div>
-                        <span>Laba Wasa Net (Setelah Diskon)</span>
+                        <span>Laba Kantor Net (Setelah Diskon)</span>
                       </div>
                     </TableCell>
                     <TableCell className="py-3 px-2 sm:py-4 sm:px-5 text-right font-bold text-lg sm:text-lg" style={{ color: '#FFFFFF' }}>
-                      {formatCurrency(metrics.wasaNetProfit)}
+                      {formatCurrency(metrics.officeProfit)}
                     </TableCell>
                     <TableCell className="py-2.5 px-2 sm:py-4 sm:px-5 text-right" style={{ color: '#FFFFFF', fontSize: '12px' }}>
                       {formatCurrency(comparisonMetrics.profitChange)}
@@ -918,7 +844,7 @@ export default function DashboardPage() {
                       {getChangeIndicator(comparisonMetrics.profitChange, comparisonMetrics.profitChangePercent)}
                     </TableCell>
                   </TableRow>
-                <TableRow>
+                <TableRow className="table-row-hover">
                     <TableCell className="py-2.5 px-2 sm:py-4 sm:px-5 font-medium" style={{ color: '#FFFFFF' }}>
                       <div className="flex items-center space-x-1 sm:space-x-2">
                         <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#06B6D4' }}></div>
@@ -946,7 +872,7 @@ export default function DashboardPage() {
 
         {/* Top Customers Table */}
         <div className="grid gap-3 sm:gap-4 lg:gap-6 grid-cols-1 xl:grid-cols-2">
-          <Card className="border-border shadow-lg hover:shadow-xl transition-shadow" style={{ backgroundColor: '#1B2336' }}>
+          <Card className="border-border shadow-lg transition-shadow" style={{ backgroundColor: '#1B2336' }}>
             <CardHeader className="pb-3 sm:pb-4 px-3 sm:px-4 pt-4 sm:pt-5">
               <CardTitle className="flex items-center space-x-2 sm:space-x-3" style={{ color: '#FFFFFF' }}>
                 <div className="p-2 rounded-lg transition-all duration-300" style={{ backgroundColor: '#3B82F620' }}>
@@ -960,16 +886,16 @@ export default function DashboardPage() {
                 <div className="overflow-x-auto scrollbar-hide">
                   <div className="min-w-[400px] sm:min-w-[500px]">
                     <UITable>
-                <TableHeader>
-                    <TableRow style={{ backgroundColor: '#1E293B' }}>
-                      <TableHead className="py-2 px-2 sm:py-3 sm:px-3 text-xs sm:text-sm font-semibold uppercase tracking-wider leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>Nama</TableHead>
-                      <TableHead className="py-2 px-2 sm:py-3 sm:px-3 text-xs sm:text-sm font-semibold uppercase tracking-wider text-right leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>Paket</TableHead>
-                      <TableHead className="py-2 px-2 sm:py-3 sm:px-3 text-xs sm:text-sm font-semibold uppercase tracking-wider text-right leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>Harga</TableHead>
+                <TableHeader className="table-header-white">
+                    <TableRow className="table-row-hover-dark" style={{ backgroundColor: '#1E293B' }}>
+                      <TableHead className="py-2 px-2 sm:py-3 sm:px-3 text-xs sm:text-sm font-semibold uppercase tracking-wider leading-tight transition-all duration-300" style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Nama</TableHead>
+                      <TableHead className="py-2 px-2 sm:py-3 sm:px-3 text-xs sm:text-sm font-semibold uppercase tracking-wider text-right leading-tight transition-all duration-300" style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Paket</TableHead>
+                      <TableHead className="py-2 px-2 sm:py-3 sm:px-3 text-xs sm:text-sm font-semibold uppercase tracking-wider text-right leading-tight transition-all duration-300" style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Harga</TableHead>
                     </TableRow>
                   </TableHeader>
                 <TableBody>
                   {getTopCustomers().length === 0 ? (
-                  <TableRow>
+                  <TableRow className="table-row-hover">
                       <TableCell colSpan={3} className="text-center py-6 sm:py-8" style={{ color: '#FFFFFF' }}>
                         <div className="flex flex-col items-center space-y-2">
                           <Users className="h-6 w-6 sm:h-8 sm:w-8 mx-auto transition-all duration-300" style={{ color: '#FFFFFF' }} />
@@ -979,7 +905,7 @@ export default function DashboardPage() {
                     </TableRow>
                   ) : (
                     getTopCustomers().map((customer, index) => (
-                      <TableRow key={customer.id} className="border-b last:border-b-0 hover:bg-white/5 transition-colors transition-all duration-300" style={{ borderColor: '#1E293B' }}>
+                      <TableRow key={customer.id} className="border-b last:border-b-0 table-row-hover" style={{ borderColor: '#1E293B' }}>
                         <TableCell className="py-2 px-2 sm:py-3 sm:px-3">
                           <div className="flex items-center space-x-2 sm:space-x-3">
                             <div className="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full text-xs sm:text-sm font-bold transition-all duration-300"
@@ -1025,7 +951,7 @@ export default function DashboardPage() {
           </Card>
 
           {/* Top Expenses Table */}
-          <Card className="border-border shadow-lg hover:shadow-xl transition-shadow" style={{ backgroundColor: '#1B2336' }}>
+          <Card className="border-border shadow-lg transition-shadow" style={{ backgroundColor: '#1B2336' }}>
             <CardHeader className="pb-3 sm:pb-4 px-3 sm:px-4 pt-4 sm:pt-5">
               <CardTitle className="flex items-center space-x-2 sm:space-x-3" style={{ color: '#FFFFFF' }}>
                 <div className="p-2 rounded-lg transition-all duration-300" style={{ backgroundColor: '#EF444420' }}>
@@ -1039,16 +965,16 @@ export default function DashboardPage() {
                 <div className="overflow-x-auto scrollbar-hide">
                   <div className="min-w-[400px] sm:min-w-[500px]">
                     <UITable>
-                <TableHeader>
-                    <TableRow style={{ backgroundColor: '#1E293B' }}>
-                      <TableHead className="py-2 px-2 sm:py-3 sm:px-3 text-xs sm:text-sm font-semibold uppercase tracking-wider leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>Deskripsi</TableHead>
-                      <TableHead className="py-2 px-2 sm:py-3 sm:px-3 text-xs sm:text-sm font-semibold uppercase tracking-wider text-right leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>Kategori</TableHead>
-                      <TableHead className="py-2 px-2 sm:py-3 sm:px-3 text-xs sm:text-sm font-semibold uppercase tracking-wider text-right leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>Jumlah</TableHead>
+                <TableHeader className="table-header-white">
+                    <TableRow className="table-row-hover-dark" style={{ backgroundColor: '#1E293B' }}>
+                      <TableHead className="py-2 px-2 sm:py-3 sm:px-3 text-xs sm:text-sm font-semibold uppercase tracking-wider leading-tight transition-all duration-300" style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Deskripsi</TableHead>
+                      <TableHead className="py-2 px-2 sm:py-3 sm:px-3 text-xs sm:text-sm font-semibold uppercase tracking-wider text-right leading-tight transition-all duration-300" style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Kategori</TableHead>
+                      <TableHead className="py-2 px-2 sm:py-3 sm:px-3 text-xs sm:text-sm font-semibold uppercase tracking-wider text-right leading-tight transition-all duration-300" style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Jumlah</TableHead>
                     </TableRow>
                   </TableHeader>
                 <TableBody>
                   {getTopExpenses().length === 0 ? (
-                  <TableRow>
+                  <TableRow className="table-row-hover">
                       <TableCell colSpan={3} className="text-center py-6 sm:py-8" style={{ color: '#FFFFFF' }}>
                         <div className="flex flex-col items-center space-y-2">
                           <TrendingDown className="h-6 w-6 sm:h-8 sm:w-8 mx-auto transition-all duration-300" style={{ color: '#FFFFFF' }} />
@@ -1058,7 +984,7 @@ export default function DashboardPage() {
                     </TableRow>
                   ) : (
                     getTopExpenses().map((expense, index) => (
-                      <TableRow key={expense.id} className="border-b last:border-b-0 hover:bg-white/5 transition-colors transition-all duration-300" style={{ borderColor: '#1E293B' }}>
+                      <TableRow key={expense.id} className="border-b last:border-b-0 table-row-hover" style={{ borderColor: '#1E293B' }}>
                         <TableCell className="py-2 px-2 sm:py-3 sm:px-3">
                           <div className="flex items-center space-x-2 sm:space-x-3">
                             <div className="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full text-xs sm:text-sm font-bold transition-all duration-300"

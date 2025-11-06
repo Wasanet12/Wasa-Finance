@@ -5,7 +5,7 @@
 
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, doc, deleteDoc } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getAnalytics } from 'firebase/analytics';
 
@@ -79,6 +79,22 @@ export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : nul
 
 // Export Firebase app instance
 export default app;
+
+// Check Firebase connection
+export const checkFirebaseConnection = async (): Promise<boolean> => {
+  try {
+    const testCollection = collection(db, 'connection-test');
+    const testDoc = await addDoc(testCollection, {
+      timestamp: new Date(),
+      test: true
+    });
+    await deleteDoc(doc(db, 'connection-test', testDoc.id));
+    return true;
+  } catch (error) {
+    console.error('Firebase connection test failed:', error);
+    return false;
+  }
+};
 
 // Export types for better TypeScript support
 export type FirebaseApp = typeof app;

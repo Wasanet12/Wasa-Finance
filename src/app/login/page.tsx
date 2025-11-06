@@ -117,7 +117,7 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full bg-[#1B2336] text-[#FFFFFF] hover:bg-[#2D3548]"
+              className="w-full custom-btn"
               disabled={loading || authLoading}
             >
               {loading || authLoading ? 'Sedang masuk...' : 'Login'}

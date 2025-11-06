@@ -62,7 +62,11 @@ export function MarkUnpaidForm({ customer, onSuccess, trigger }: MarkUnpaidFormP
       variant="outline"
       size="sm"
       title="Tandai sebagai Belum Bayar"
-      className="text-yellow-600 border-yellow-600 hover:bg-yellow-50"
+      className="custom-btn"
+      style={{
+        color: '#D97706',
+        borderColor: '#D97706'
+      }}
     >
       <DollarSign className="h-4 w-4" />
     </Button>
@@ -73,7 +77,7 @@ export function MarkUnpaidForm({ customer, onSuccess, trigger }: MarkUnpaidFormP
       <AlertDialogTrigger asChild>
         {trigger || defaultTrigger}
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent style={{ backgroundColor: '#1B2336' }}>
         <AlertDialogHeader>
           <AlertDialogTitle>
             Tandai sebagai Belum Bayar
@@ -90,11 +94,15 @@ export function MarkUnpaidForm({ customer, onSuccess, trigger }: MarkUnpaidFormP
           </ul>
         </div>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={loading}>Batal</AlertDialogCancel>
+          <AlertDialogCancel disabled={loading} className="custom-btn">Batal</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleMarkAsUnpaid}
             disabled={loading}
-            className="bg-yellow-600 hover:bg-yellow-700 text-white"
+            className="custom-btn"
+            style={{
+              backgroundColor: '#D97706',
+              color: '#FFFFFF'
+            }}
           >
             {loading ? 'Memproses...' : 'Ya, Tandai sebagai Belum Bayar'}
           </AlertDialogAction>

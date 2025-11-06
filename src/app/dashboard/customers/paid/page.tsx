@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { services } from '@/lib/firestore';
 import { Customer } from '@/lib/types';
-import { UserCheck, DollarSign, Building2, CreditCard, Building, Download } from 'lucide-react';
+import { UserCheck, DollarSign, Building2, CreditCard, Building, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import { formatDate, formatCurrency, toDate } from '@/utils/dateUtils';
 import {
   Table,
   TableBody,
@@ -15,15 +16,39 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { formatDate, formatCurrency } from '@/utils/dateUtils';
 
 export default function PaidCustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   useEffect(() => {
     fetchPaidCustomers();
   }, []);
+
+  // Responsive pagination - set items per page based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window !== 'undefined') {
+        setItemsPerPage(window.innerWidth < 768 ? 5 : 10);
+      }
+    };
+
+    // Set initial value
+    handleResize();
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Reset to page 1 when customers change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [customers]);
 
   const fetchPaidCustomers = async () => {
     try {
@@ -31,7 +56,16 @@ export default function PaidCustomersPage() {
       // Show ALL active customers regardless of when they were created
       const response = await services.customer.getByStatus('active');
       if (response.success && response.data) {
-        setCustomers(response.data);
+        // Sort customers by createdAt descending (newest first)
+        const sortedCustomers = response.data.sort((a, b) => {
+          const dateA = toDate(a.createdAt);
+          const dateB = toDate(b.createdAt);
+          if (dateA && dateB) {
+            return dateB.getTime() - dateA.getTime();
+          }
+          return 0;
+        });
+        setCustomers(sortedCustomers);
       } else {
         console.error('Failed to fetch paid customers:', response.error);
         setCustomers([]);
@@ -45,6 +79,16 @@ export default function PaidCustomersPage() {
   };
 
   
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = customers.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(customers.length / itemsPerPage);
+
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  const goToPreviousPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
+  const goToNextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
+
   const totalRevenue = customers.reduce((sum, customer) => sum + (customer.packagePrice - (customer.discountAmount || 0)), 0);
   const wasaRevenue = customers
     .filter(customer => customer.paymentTarget === 'Wasa')
@@ -88,13 +132,10 @@ export default function PaidCustomersPage() {
       <div className="flex justify-end">
         <Button
           onClick={handleDownloadPDF}
+          className="custom-btn flex items-center justify-center space-x-2 px-4 py-2 text-sm sm:text-base"
           style={{
-            backgroundColor: '#1B2336',
-            color: '#FFFFFF',
-            borderColor: '#3D4558',
             minHeight: '44px', // Touch-friendly size
           }}
-          className="flex items-center justify-center space-x-2 px-4 py-2 text-sm sm:text-base hover:bg-opacity-90 transition-colors"
         >
           <Download className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
           <span className="hidden sm:inline">Download PDF</span>
@@ -211,27 +252,27 @@ export default function PaidCustomersPage() {
           <CardTitle style={{ color: '#FFFFFF' }}>Daftar Pelanggan Aktif</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border" style={{ borderColor: '#3D4558' }}>
+          <div className="rounded-lg border table-container-rounded" style={{ borderColor: '#3D4558', borderRadius: '0.5rem', overflow: 'hidden' }}>
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead style={{ color: '#FFFFFF' }}>Nama</TableHead>
-                  <TableHead style={{ color: '#FFFFFF' }}>Paket</TableHead>
-                  <TableHead style={{ color: '#FFFFFF' }}>Harga</TableHead>
-                  <TableHead style={{ color: '#FFFFFF' }}>Bayar ke</TableHead>
-                  <TableHead style={{ color: '#FFFFFF' }}>Tanggal</TableHead>
+              <TableHeader className="table-header-white">
+                <TableRow className="table-row-hover">
+                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Nama</TableHead>
+                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Paket</TableHead>
+                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Harga</TableHead>
+                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Bayar ke</TableHead>
+                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Tanggal</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {customers.length === 0 ? (
-                  <TableRow>
+                  <TableRow className="table-row-hover">
                     <TableCell colSpan={5} className="text-center py-8" style={{ color: '#FFFFFF' }}>
                       Belum ada pelanggan yang sudah bayar.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  customers.map((customer) => (
-                    <TableRow key={customer.id}>
+                  currentItems.map((customer) => (
+                    <TableRow key={customer.id} className="table-row-hover">
                       <TableCell className="font-medium" style={{ color: '#FFFFFF' }}>{customer.name}</TableCell>
                       <TableCell style={{ color: '#FFFFFF' }}>{customer.packageName}</TableCell>
                       <TableCell className="font-semibold" style={{ color: '#FFFFFF' }}>
@@ -254,6 +295,69 @@ export default function PaidCustomersPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Pagination Component */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-4 px-4">
+          <div className="text-sm text-gray-300">
+            Menampilkan {indexOfFirstItem + 1} hingga {Math.min(indexOfLastItem, customers.length)} dari {customers.length} pelanggan
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Button
+              onClick={goToPreviousPage}
+              disabled={currentPage === 1}
+              className="custom-btn px-3 py-1"
+              variant="outline"
+              size="sm"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+
+            <div className="flex items-center space-x-1">
+              {/* Page numbers */}
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNumber;
+                if (totalPages <= 5) {
+                  pageNumber = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNumber = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNumber = totalPages - 4 + i;
+                } else {
+                  pageNumber = currentPage - 2 + i;
+                }
+
+                return (
+                  <Button
+                    key={pageNumber}
+                    onClick={() => paginate(pageNumber)}
+                    className={`custom-btn px-3 py-1 text-sm ${
+                      currentPage === pageNumber
+                        ? 'ring-2 ring-blue-500'
+                        : ''
+                    }`}
+                    variant={currentPage === pageNumber ? 'default' : 'outline'}
+                    size="sm"
+                  >
+                    {pageNumber}
+                  </Button>
+                );
+              })}
+            </div>
+
+            <Button
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+              className="custom-btn px-3 py-1"
+              variant="outline"
+              size="sm"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

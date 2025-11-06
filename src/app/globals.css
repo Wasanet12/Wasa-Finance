@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-
 :root {
   --radius: 0.625rem;
   --background: #1B2336;
@@ -158,23 +157,152 @@
   }
 }
 
-/* Calendar Icon White Color */
+/* Date input calendar icon styling - SIMPLE WORKING VERSION */
 .date-input-white::-webkit-calendar-picker-indicator {
-  filter: invert(1) brightness(2);
+  background-color: #FBBF24;
+  border-radius: 4px;
   cursor: pointer;
+  padding: 4px;
+  margin: 0 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
-.date-input-white::-webkit-inner-spin-button {
-  filter: invert(1) brightness(2);
-}
-
-.date-input-white::-webkit-clear-button {
-  filter: invert(1) brightness(2);
-}
-
-/* Firefox Date Input Styling */
 .date-input-white::-moz-calendar-picker-indicator {
-  filter: invert(1) brightness(2);
+  background-color: #FBBF24;
+  border-radius: 4px;
   cursor: pointer;
-  background-color: transparent;
+  padding: 4px;
+  margin: 0 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.date-input-white {
+  color-scheme: dark;
+}
+
+/* Custom hover effect based on your example */
+.custom-btn {
+  background-color: #1B2336;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.custom-btn:hover {
+  background-color: #ffffff;
+  color: #1B2336;
+}
+
+/* Table hover effects */
+.table-row-hover {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.table-row-hover:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.table-row-hover:active {
+  background-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(0);
+}
+
+/* Table hover effects for different row colors */
+.table-row-hover-dark {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.table-row-hover-dark:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.table-row-hover-dark:active {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(0);
+}
+
+/* Custom hover for select elements */
+.custom-select {
+  background-color: #1B2336;
+  color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.custom-select:hover {
+  background-color: #ffffff;
+  color: #1B2336;
+}
+
+/* Custom hover for select items */
+.custom-select-item {
+  color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.custom-select-item:hover {
+  background-color: #ffffff;
+  color: #1B2336;
+}
+
+/* Table header styling - VERY SPECIFIC OVERRIDE */
+.table-header-white {
+  background-color: #FFFFFF !important;
+}
+
+.table-header-white th,
+.table-header-white .text-foreground,
+.text-foreground.table-header-white,
+[data-slot="table-head"].text-foreground,
+.table-header-white [data-slot="table-head"] {
+  background-color: #FFFFFF !important;
+  color: #1B2336 !important;
+  font-weight: 600 !important;
+}
+
+/* Nuclear approach - override all possible selectors */
+.table-header-white th,
+.table-header-white .text-foreground,
+.table-header-white [data-slot="table-head"],
+[data-slot="table-head"].table-header-white,
+th.table-header-white,
+.text-foreground.table-header-white {
+  background-color: #FFFFFF !important;
+  color: #1B2336 !important;
+  font-weight: 600 !important;
+}
+
+/* Table container rounded corners - NUCLEAR APPROACH */
+.table-container-rounded {
+  border-radius: 0.5rem !important;
+  overflow: hidden !important;
+}
+
+.table-container-rounded div,
+.table-container-rounded .relative,
+.table-container-rounded [data-slot="table-container"] {
+  border-radius: 0.5rem !important;
+  overflow: hidden !important;
+}
+
+/* Force all table containers to be rounded */
+.rounded-lg[data-slot="table-container"],
+[data-slot="table-container"].rounded-lg {
+  border-radius: 0.5rem !important;
+}
+
+/* Override any table container */
+.table-container-rounded table,
+.table-container-rounded [data-slot="table"] {
+  border-radius: 0.5rem !important;
 }

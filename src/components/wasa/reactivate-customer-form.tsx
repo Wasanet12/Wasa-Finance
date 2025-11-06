@@ -126,9 +126,7 @@ export function ReactivateCustomerForm({ customer, onSuccess, trigger }: Reactiv
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button style={{
-            backgroundColor: 'transparent',
-            color: '#FFFFFF',
+          <Button className="custom-btn" style={{
             borderColor: '#3D4558'
           }}>
             <Edit className="mr-2 h-4 w-4" style={{ color: '#FFFFFF' }} />
@@ -177,11 +175,7 @@ export function ReactivateCustomerForm({ customer, onSuccess, trigger }: Reactiv
                     handlePackageChange(value);
                   }} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger style={{
-                        backgroundColor: '#2D3548',
-                        color: '#FFFFFF',
-                        borderColor: '#3D4558'
-                      }}>
+                      <SelectTrigger className="custom-select">
                         <SelectValue placeholder="Pilih paket layanan" style={{ color: '#FFFFFF' }} />
                       </SelectTrigger>
                     </FormControl>
@@ -190,7 +184,7 @@ export function ReactivateCustomerForm({ customer, onSuccess, trigger }: Reactiv
                       borderColor: '#3D4558'
                     }}>
                       {packages.map((pkg) => (
-                        <SelectItem key={pkg.id} value={pkg.name} style={{ color: '#FFFFFF' }}>
+                        <SelectItem key={pkg.id} value={pkg.name} className="custom-select-item">
                           {pkg.name} - {new Intl.NumberFormat('id-ID', {
                             style: 'currency',
                             currency: 'IDR',
@@ -276,11 +270,7 @@ export function ReactivateCustomerForm({ customer, onSuccess, trigger }: Reactiv
                   <FormLabel style={{ color: '#FFFFFF' }}>Status Pembayaran</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger style={{
-                        backgroundColor: '#2D3548',
-                        color: '#FFFFFF',
-                        borderColor: '#3D4558'
-                      }}>
+                      <SelectTrigger className="custom-select">
                         <SelectValue placeholder="Pilih status pembayaran" style={{ color: '#FFFFFF' }} />
                       </SelectTrigger>
                     </FormControl>
@@ -288,7 +278,7 @@ export function ReactivateCustomerForm({ customer, onSuccess, trigger }: Reactiv
                       backgroundColor: '#1B2336',
                       borderColor: '#3D4558'
                     }}>
-                      <SelectItem value="active" style={{ color: '#FFFFFF' }}>Active</SelectItem>
+                      <SelectItem value="active" className="custom-select-item">Active</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage style={{ color: '#FFFFFF' }} />
@@ -304,11 +294,7 @@ export function ReactivateCustomerForm({ customer, onSuccess, trigger }: Reactiv
                   <FormLabel style={{ color: '#FFFFFF' }}>Tujuan Pembayaran</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger style={{
-                        backgroundColor: '#2D3548',
-                        color: '#FFFFFF',
-                        borderColor: '#3D4558'
-                      }}>
+                      <SelectTrigger className="custom-select">
                         <SelectValue placeholder="Pilih tujuan pembayaran" style={{ color: '#FFFFFF' }} />
                       </SelectTrigger>
                     </FormControl>
@@ -316,8 +302,8 @@ export function ReactivateCustomerForm({ customer, onSuccess, trigger }: Reactiv
                       backgroundColor: '#1B2336',
                       borderColor: '#3D4558'
                     }}>
-                      <SelectItem value="Wasa" style={{ color: '#FFFFFF' }}>Wasa</SelectItem>
-                      <SelectItem value="Kantor" style={{ color: '#FFFFFF' }}>Kantor</SelectItem>
+                      <SelectItem value="Wasa" className="custom-select-item">Wasa</SelectItem>
+                      <SelectItem value="Kantor" className="custom-select-item">Kantor</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage style={{ color: '#FFFFFF' }} />
@@ -330,9 +316,8 @@ export function ReactivateCustomerForm({ customer, onSuccess, trigger }: Reactiv
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
+                className="custom-btn"
                 style={{
-                  backgroundColor: 'transparent',
-                  color: '#FFFFFF',
                   borderColor: '#3D4558'
                 }}
               >
@@ -341,6 +326,7 @@ export function ReactivateCustomerForm({ customer, onSuccess, trigger }: Reactiv
               <Button
                 type="submit"
                 disabled={loading}
+                className="custom-btn"
                 style={{
                   backgroundColor: '#10B981',
                   color: '#FFFFFF'

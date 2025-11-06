@@ -155,11 +155,8 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
       <DialogTrigger asChild>
         {trigger || (
           <Button
-            className="flex items-center justify-center space-x-2 px-4 py-2 text-sm sm:text-base hover:bg-opacity-90 transition-colors"
+            className="flex items-center justify-center space-x-2 px-4 py-2 text-sm sm:text-base custom-btn"
             style={{
-              backgroundColor: '#1B2336',
-              color: '#FFFFFF',
-              borderColor: '#3D4558',
               minHeight: '44px', // Touch-friendly size
             }}
           >
@@ -219,11 +216,7 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
                     handlePackageChange(value);
                   }} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm" style={{
-                        backgroundColor: '#2D3548',
-                        color: '#FFFFFF',
-                        borderColor: '#3D4558'
-                      }}>
+                      <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm custom-select">
                         <SelectValue placeholder="Pilih paket" style={{ color: '#FFFFFF' }} />
                       </SelectTrigger>
                     </FormControl>
@@ -232,7 +225,7 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
                       borderColor: '#3D4558'
                     }}>
                       {packages.map((pkg) => (
-                        <SelectItem key={pkg.id} value={pkg.name} className="text-xs sm:text-sm py-1 sm:py-2" style={{ color: '#FFFFFF' }}>
+                        <SelectItem key={pkg.id} value={pkg.name} className="text-xs sm:text-sm py-1 sm:py-2 custom-select-item">
                           {pkg.name}
                         </SelectItem>
                       ))}
@@ -316,11 +309,7 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
                   <FormLabel className="text-xs sm:text-sm font-medium" style={{ color: '#FFFFFF' }}>Status</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm" style={{
-                        backgroundColor: '#2D3548',
-                        color: '#FFFFFF',
-                        borderColor: '#3D4558'
-                      }}>
+                      <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm custom-select">
                         <SelectValue placeholder="Pilih status" style={{ color: '#FFFFFF' }} />
                       </SelectTrigger>
                     </FormControl>
@@ -328,9 +317,9 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
                       backgroundColor: '#1B2336',
                       borderColor: '#3D4558'
                     }}>
-                      <SelectItem value="active" className="text-xs sm:text-sm py-1 sm:py-2" style={{ color: '#FFFFFF' }}>Aktif</SelectItem>
-                      <SelectItem value="inactive" className="text-xs sm:text-sm py-1 sm:py-2" style={{ color: '#FFFFFF' }}>Tidak Aktif</SelectItem>
-                      <SelectItem value="Belum Bayar" className="text-xs sm:text-sm py-1 sm:py-2" style={{ color: '#FFFFFF' }}>Belum Bayar</SelectItem>
+                      <SelectItem value="active" className="text-xs sm:text-sm py-1 sm:py-2 custom-select-item">Aktif</SelectItem>
+                      <SelectItem value="inactive" className="text-xs sm:text-sm py-1 sm:py-2 custom-select-item">Tidak Aktif</SelectItem>
+                      <SelectItem value="Belum Bayar" className="text-xs sm:text-sm py-1 sm:py-2 custom-select-item">Belum Bayar</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage className="text-xs" style={{ color: '#FFFFFF' }} />
@@ -346,11 +335,7 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
                   <FormLabel className="text-xs sm:text-sm font-medium" style={{ color: '#FFFFFF' }}>Bayar ke</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm" style={{
-                        backgroundColor: '#2D3548',
-                        color: '#FFFFFF',
-                        borderColor: '#3D4558'
-                      }}>
+                      <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm custom-select">
                         <SelectValue placeholder="Pilih tujuan" style={{ color: '#FFFFFF' }} />
                       </SelectTrigger>
                     </FormControl>
@@ -358,8 +343,8 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
                       backgroundColor: '#1B2336',
                       borderColor: '#3D4558'
                     }}>
-                      <SelectItem value="Wasa" className="text-xs sm:text-sm py-1 sm:py-2" style={{ color: '#FFFFFF' }}>Wasa</SelectItem>
-                      <SelectItem value="Kantor" className="text-xs sm:text-sm py-1 sm:py-2" style={{ color: '#FFFFFF' }}>Kantor</SelectItem>
+                      <SelectItem value="Wasa" className="text-xs sm:text-sm py-1 sm:py-2 custom-select-item">Wasa</SelectItem>
+                      <SelectItem value="Kantor" className="text-xs sm:text-sm py-1 sm:py-2 custom-select-item">Kantor</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage className="text-xs" style={{ color: '#FFFFFF' }} />
@@ -372,22 +357,16 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
-                className="w-full sm:w-auto h-8 sm:h-9 text-xs sm:text-sm order-2 sm:order-1 min-h-[36px]"
-                style={{
-                  backgroundColor: 'transparent',
-                  color: '#FFFFFF',
-                  borderColor: '#3D4558'
-                }}
+                className="w-full sm:w-auto h-8 sm:h-9 text-xs sm:text-sm order-2 sm:order-1 min-h-[36px] custom-btn"
               >
                 Batal
               </Button>
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full sm:w-auto h-8 sm:h-9 text-xs sm:text-sm order-1 sm:order-2 min-h-[36px]"
+                className="w-full sm:w-auto h-8 sm:h-9 text-xs sm:text-sm order-1 sm:order-2 min-h-[36px] custom-btn"
                 style={{
-                  backgroundColor: '#10B981',
-                  color: '#FFFFFF'
+                  backgroundColor: '#10B981'
                 }}
               >
                 {loading ? 'Menyimpan...' : 'Simpan'}

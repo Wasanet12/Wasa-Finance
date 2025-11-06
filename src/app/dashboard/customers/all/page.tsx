@@ -30,17 +30,42 @@ import { Customer } from '@/lib/types';
 import { getCustomers, deleteCustomer } from '@/lib/firestore';
 import { generateCustomerPDFReport } from '@/utils/pdfGenerator';
 import { formatDate, formatCurrency, toDate } from '@/utils/dateUtils';
-import { Search, Edit, Trash2, Users, UserCheck, DollarSign, Building2, Tag, Download, AlertCircle } from 'lucide-react';
+import { Search, Edit, Trash2, Users, UserCheck, DollarSign, Building2, Tag, Download, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function AllCustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   useEffect(() => {
     fetchCustomers();
   }, []);
+
+  // Responsive pagination - set items per page based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window !== 'undefined') {
+        setItemsPerPage(window.innerWidth < 768 ? 5 : 10);
+      }
+    };
+
+    // Set initial value
+    handleResize();
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Reset to page 1 when filtered customers change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filteredCustomers]);
 
   useEffect(() => {
     let filtered = customers.filter(customer =>
@@ -55,7 +80,16 @@ export default function AllCustomersPage() {
     try {
       const customersResult = await getCustomers();
       if (customersResult.success && customersResult.data) {
-        setCustomers(customersResult.data);
+        // Sort customers by createdAt descending (newest first)
+        const sortedCustomers = customersResult.data.sort((a, b) => {
+          const dateA = toDate(a.createdAt);
+          const dateB = toDate(b.createdAt);
+          if (dateA && dateB) {
+            return dateB.getTime() - dateA.getTime();
+          }
+          return 0;
+        });
+        setCustomers(sortedCustomers);
       } else {
         console.error('Error fetching customers:', customersResult.error);
       }
@@ -78,6 +112,16 @@ export default function AllCustomersPage() {
       console.error('Error deleting customer:', error);
     }
   };
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredCustomers.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
+
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  const goToPreviousPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
+  const goToNextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
 
   const getStatusBadge = (status: Customer['status']) => {
     const styles = {
@@ -195,13 +239,10 @@ export default function AllCustomersPage() {
         <div className="flex flex-col sm:flex-row gap-2">
           <Button
             onClick={handleDownloadPDF}
+            className="custom-btn flex items-center justify-center space-x-2 px-4 py-2 text-sm sm:text-base w-full sm:w-auto"
             style={{
-              backgroundColor: '#1B2336',
-              color: '#FFFFFF',
-              borderColor: '#3D4558',
               minHeight: '44px', // Touch-friendly size
             }}
-            className="flex items-center justify-center space-x-2 px-4 py-2 text-sm sm:text-base w-full sm:w-auto hover:bg-opacity-90 transition-colors"
           >
             <Download className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
             <span className="hidden sm:inline">Download PDF</span>
@@ -392,7 +433,7 @@ export default function AllCustomersPage() {
                             customer={customer}
                             onSuccess={fetchCustomers}
                             trigger={
-                              <Button variant="outline" size="sm" className="h-8 w-8 p-0 text-yellow-600 border-yellow-600">
+                              <Button variant="outline" size="sm" className="custom-btn h-8 w-8 p-0" style={{ backgroundColor: '#F59E0B', borderColor: '#F59E0B', color: '#FFFFFF' }}>
                                 <AlertCircle className="h-3 w-3" />
                               </Button>
                             }
@@ -402,14 +443,14 @@ export default function AllCustomersPage() {
                           customer={customer}
                           onSuccess={fetchCustomers}
                           trigger={
-                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                            <Button variant="outline" size="sm" className="custom-btn h-8 w-8 p-0">
                               <Edit className="h-3 w-3" />
                             </Button>
                           }
                         />
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                            <Button variant="outline" size="sm" className="custom-btn h-8 w-8 p-0">
                               <Trash2 className="h-3 w-3" />
                             </Button>
                           </AlertDialogTrigger>
@@ -425,7 +466,8 @@ export default function AllCustomersPage() {
                               <AlertDialogCancel>Batal</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() => handleDeleteCustomer(customer.id!)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                className="custom-btn"
+                                style={{ backgroundColor: '#EF4444' }}
                               >
                                 Hapus
                               </AlertDialogAction>
@@ -441,23 +483,23 @@ export default function AllCustomersPage() {
           </div>
 
           {/* Desktop Table Layout */}
-          <div className="hidden lg:block rounded-md border" style={{ borderColor: '#3D4558' }}>
+          <div className="hidden lg:block rounded-lg border table-container-rounded" style={{ borderColor: '#3D4558', borderRadius: '0.5rem', overflow: 'hidden' }}>
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead style={{ color: '#FFFFFF' }}>Nama</TableHead>
-                  <TableHead style={{ color: '#FFFFFF' }}>Paket</TableHead>
-                  <TableHead style={{ color: '#FFFFFF' }}>Harga</TableHead>
-                  <TableHead style={{ color: '#FFFFFF' }}>Diskon</TableHead>
-                  <TableHead style={{ color: '#FFFFFF' }}>Status</TableHead>
-                  <TableHead style={{ color: '#FFFFFF' }}>Bayar ke</TableHead>
-                  <TableHead style={{ color: '#FFFFFF' }}>Tanggal</TableHead>
-                  <TableHead className="text-right" style={{ color: '#FFFFFF' }}>Aksi</TableHead>
+              <TableHeader className="table-header-white">
+                <TableRow className="table-row-hover">
+                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Nama</TableHead>
+                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Paket</TableHead>
+                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Harga</TableHead>
+                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Diskon</TableHead>
+                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Status</TableHead>
+                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Bayar ke</TableHead>
+                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Tanggal</TableHead>
+                  <TableHead className="text-right" style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredCustomers.length === 0 ? (
-                  <TableRow>
+                  <TableRow className="table-row-hover">
                     <TableCell colSpan={8} className="text-center py-8" style={{ color: '#FFFFFF' }}>
                       {searchTerm
                         ? 'Tidak ada pelanggan yang cocok dengan pencarian.'
@@ -465,8 +507,8 @@ export default function AllCustomersPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredCustomers.map((customer) => (
-                    <TableRow key={customer.id}>
+                  currentItems.map((customer) => (
+                    <TableRow key={customer.id} className="table-row-hover">
                       <TableCell className="font-medium" style={{ color: '#FFFFFF' }}>{customer.name}</TableCell>
                       <TableCell style={{ color: '#FFFFFF' }}>{customer.packageName}</TableCell>
                       <TableCell style={{ color: '#FFFFFF' }}>{getPriceDisplay(customer)}</TableCell>
@@ -484,8 +526,9 @@ export default function AllCustomersPage() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="text-yellow-600 border-yellow-600 hover:bg-yellow-50"
+                                  className="custom-btn"
                                   title="Tandai sebagai Belum Bayar"
+                                  style={{ backgroundColor: '#F59E0B', borderColor: '#F59E0B', color: '#FFFFFF' }}
                                 >
                                   <AlertCircle className="h-4 w-4" />
                                 </Button>
@@ -496,14 +539,14 @@ export default function AllCustomersPage() {
                             customer={customer}
                             onSuccess={fetchCustomers}
                             trigger={
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" className="custom-btn">
                                 <Edit className="h-4 w-4" />
                               </Button>
                             }
                           />
                             <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" className="custom-btn">
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </AlertDialogTrigger>
@@ -519,7 +562,8 @@ export default function AllCustomersPage() {
                                 <AlertDialogCancel>Batal</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => handleDeleteCustomer(customer.id!)}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  className="custom-btn"
+                                  style={{ backgroundColor: '#EF4444' }}
                                 >
                                   Hapus
                                 </AlertDialogAction>
@@ -536,6 +580,69 @@ export default function AllCustomersPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Pagination Component */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-4 px-4">
+          <div className="text-sm text-gray-300">
+            Menampilkan {indexOfFirstItem + 1} hingga {Math.min(indexOfLastItem, filteredCustomers.length)} dari {filteredCustomers.length} pelanggan
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Button
+              onClick={goToPreviousPage}
+              disabled={currentPage === 1}
+              className="custom-btn px-3 py-1"
+              variant="outline"
+              size="sm"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+
+            <div className="flex items-center space-x-1">
+              {/* Page numbers */}
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNumber;
+                if (totalPages <= 5) {
+                  pageNumber = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNumber = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNumber = totalPages - 4 + i;
+                } else {
+                  pageNumber = currentPage - 2 + i;
+                }
+
+                return (
+                  <Button
+                    key={pageNumber}
+                    onClick={() => paginate(pageNumber)}
+                    className={`custom-btn px-3 py-1 text-sm ${
+                      currentPage === pageNumber
+                        ? 'ring-2 ring-blue-500'
+                        : ''
+                    }`}
+                    variant={currentPage === pageNumber ? 'default' : 'outline'}
+                    size="sm"
+                  >
+                    {pageNumber}
+                  </Button>
+                );
+              })}
+            </div>
+
+            <Button
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+              className="custom-btn px-3 py-1"
+              variant="outline"
+              size="sm"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
