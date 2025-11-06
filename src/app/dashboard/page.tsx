@@ -442,7 +442,7 @@ export default function DashboardPage() {
     };
 
     try {
-      generatePDFReport(pdfData);
+      await generatePDFReport(pdfData);
     } catch (error) {
       // Handle PDF generation error
     }
@@ -550,7 +550,8 @@ export default function DashboardPage() {
       </div>
 
       {/* Financial Metrics - Responsive */}
-      <div className="px-3 sm:px-4 lg:px-6">
+      <section className="px-3 sm:px-4 lg:px-6" aria-labelledby="metrics-heading">
+        <h2 id="metrics-heading" className="sr-only">Financial Metrics</h2>
         <div className="grid gap-3 sm:gap-4 lg:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <Card className="border-border shadow-lg transition-shadow" style={{ backgroundColor: '#1B2336' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
@@ -710,7 +711,8 @@ export default function DashboardPage() {
       </div>
 
       {/* Statistical Tables */}
-      <div className="px-2 sm:px-4 space-y-3 sm:space-y-6">
+      <section className="px-2 sm:px-4 space-y-3 sm:space-y-6" aria-labelledby="tables-heading">
+        <h2 id="tables-heading" className="sr-only">Statistical Tables</h2>
         {/* Comparison Metrics Table */}
         {selectedMonth !== 0 && (
           <Card className="border-border shadow-lg transition-shadow" style={{ backgroundColor: '#1B2336' }}>

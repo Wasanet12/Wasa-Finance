@@ -253,7 +253,8 @@ export default function AllCustomersPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+      <section className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5" aria-labelledby="summary-heading">
+        <h2 id="summary-heading" className="sr-only">Customer Summary</h2>
         <Card className="border-border" style={{ backgroundColor: '#1B2336' }}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-xs sm:text-sm font-medium" style={{ color: '#FFFFFF' }}>
@@ -338,9 +339,11 @@ export default function AllCustomersPage() {
             </p>
           </CardContent>
         </Card>
-      </div>
+      </section>
 
-      <Card className="border-border" style={{ backgroundColor: '#1B2336' }}>
+      <section aria-labelledby="customer-table-heading">
+        <h2 id="customer-table-heading" className="sr-only">Customer List Table</h2>
+        <Card className="border-border" style={{ backgroundColor: '#1B2336' }}>
         <CardHeader className="pb-3 sm:pb-6">
           <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2" style={{ color: '#FFFFFF' }}>
             <span className="text-lg sm:text-xl">Daftar Pelanggan</span>
@@ -654,6 +657,7 @@ export default function AllCustomersPage() {
           </div>
         </div>
       )}
+      </section>
     </div>
   );
 }

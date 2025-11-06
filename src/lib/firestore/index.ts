@@ -258,63 +258,17 @@ export const customerService = {
   },
 
   /**
-   * Get customers by status
+   * Get customers by status (Optimized with server-side filtering)
    */
   getByStatus: async (status: Customer['status']): Promise<ApiResponse<Customer[]>> => {
-    try {
-      // Get all customers ordered by creation date, then filter by status
-      const allCustomers = await getAllDocuments<Customer>(COLLECTIONS.CUSTOMERS, {
-        orderBy: { field: 'createdAt', direction: 'desc' }
-      });
-
-      if (allCustomers.success && allCustomers.data) {
-        // Filter by status on client side
-        const filteredCustomers = allCustomers.data.filter(customer => customer.status === status);
-        console.log(`Found ${filteredCustomers.length} customers with status '${status}'`);
-        return {
-          success: true,
-          data: filteredCustomers
-        };
-      }
-
-      return allCustomers;
-    } catch (error: any) {
-      console.error('Error fetching customers by status:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch customers by status'
-      };
-    }
+    return getCustomersByStatus(status);
   },
 
   /**
-   * Get customers by payment target
+   * Get customers by payment target (Optimized with server-side filtering)
    */
   getByPaymentTarget: async (paymentTarget: Customer['paymentTarget']): Promise<ApiResponse<Customer[]>> => {
-    try {
-      // Get all customers ordered by creation date, then filter by payment target
-      const allCustomers = await getAllDocuments<Customer>(COLLECTIONS.CUSTOMERS, {
-        orderBy: { field: 'createdAt', direction: 'desc' }
-      });
-
-      if (allCustomers.success && allCustomers.data) {
-        // Filter by payment target on client side
-        const filteredCustomers = allCustomers.data.filter(customer => customer.paymentTarget === paymentTarget);
-        console.log(`Found ${filteredCustomers.length} customers with payment target '${paymentTarget}'`);
-        return {
-          success: true,
-          data: filteredCustomers
-        };
-      }
-
-      return allCustomers;
-    } catch (error: any) {
-      console.error('Error fetching customers by payment target:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch customers by payment target'
-      };
-    }
+    return getCustomersByPaymentTarget(paymentTarget);
   },
 
   /**
@@ -399,33 +353,7 @@ export const packageService = {
    * Get all active packages
    */
   getActive: async (): Promise<ApiResponse<Package[]>> => {
-    try {
-      // Use simpler query to avoid index issues - get all packages ordered by creation date
-      const allPackages = await getAllDocuments<Package>(COLLECTIONS.PACKAGES, {
-        orderBy: { field: 'createdAt', direction: 'desc' }
-      });
-
-      if (allPackages.success && allPackages.data) {
-        // Filter and sort on client side
-        const activePackages = allPackages.data
-          .filter(pkg => pkg.isActive === true)
-          .sort((a, b) => a.price - b.price); // Sort by price ascending
-
-        console.log(`Found ${activePackages.length} active packages`);
-        return {
-          success: true,
-          data: activePackages
-        };
-      }
-
-      return allPackages;
-    } catch (error: any) {
-      console.error('Error fetching active packages:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch packages'
-      };
-    }
+    return getActivePackages();
   },
 
   /**
@@ -507,28 +435,10 @@ export const expenseService = {
    */
   getByMonth: async (month: number, year: number): Promise<ApiResponse<Expense[]>> => {
     try {
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 0, 23, 59, 59); // Last day of month
+      const startDate = dateToTimestamp(new Date(year, month - 1, 1));
+      const endDate = dateToTimestamp(new Date(year, month, 0, 23, 59, 59)); // Last day of month
 
-      // Get all expenses ordered by date, then filter by date range
-      const allExpenses = await getAllDocuments<Expense>(COLLECTIONS.EXPENSES, {
-        orderBy: { field: 'date', direction: 'desc' }
-      });
-
-      if (allExpenses.success && allExpenses.data) {
-        // Filter by date range on client side
-        const filteredExpenses = allExpenses.data.filter(expense => {
-          const expenseDate = expense.date;
-          return expenseDate >= startDate && expenseDate <= endDate;
-        });
-        console.log(`Found ${filteredExpenses.length} expenses for ${month}/${year}`);
-        return {
-          success: true,
-          data: filteredExpenses
-        };
-      }
-
-      return allExpenses;
+      return getExpensesByDateRange(startDate, endDate);
     } catch (error: any) {
       console.error('Error fetching expenses by month:', error);
       return {
@@ -728,6 +638,133 @@ export const settingsService = {
   }
 };
 
+// ==================== OPTIMIZED QUERY FUNCTIONS ====================
+
+/**
+ * Optimized query for customers with server-side filtering
+ */
+export const getCustomersByStatus = async (status: string): Promise<ApiResponse<Customer[]>> => {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.CUSTOMERS),
+      where('status', '==', status),
+      orderBy('createdAt', 'desc')
+    );
+
+    const querySnapshot = await getDocs(q);
+    const customers = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Customer[];
+
+    console.log(`Retrieved ${customers.length} customers with status '${status}'`);
+    return {
+      success: true,
+      data: customers
+    };
+  } catch (error) {
+    console.error(`Error getting customers by status '${status}':`, error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
+};
+
+/**
+ * Optimized query for customers by payment target
+ */
+export const getCustomersByPaymentTarget = async (paymentTarget: string): Promise<ApiResponse<Customer[]>> => {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.CUSTOMERS),
+      where('paymentTarget', '==', paymentTarget),
+      orderBy('createdAt', 'desc')
+    );
+
+    const querySnapshot = await getDocs(q);
+    const customers = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Customer[];
+
+    console.log(`Retrieved ${customers.length} customers with payment target '${paymentTarget}'`);
+    return {
+      success: true,
+      data: customers
+    };
+  } catch (error) {
+    console.error(`Error getting customers by payment target '${paymentTarget}':`, error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
+};
+
+/**
+ * Optimized query for expenses by date range
+ */
+export const getExpensesByDateRange = async (startDate: Timestamp, endDate: Timestamp): Promise<ApiResponse<Expense[]>> => {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.EXPENSES),
+      where('date', '>=', startDate),
+      where('date', '<=', endDate),
+      orderBy('date', 'desc')
+    );
+
+    const querySnapshot = await getDocs(q);
+    const expenses = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Expense[];
+
+    console.log(`Retrieved ${expenses.length} expenses for date range`);
+    return {
+      success: true,
+      data: expenses
+    };
+  } catch (error) {
+    console.error(`Error getting expenses by date range:`, error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
+};
+
+/**
+ * Optimized query for active packages only
+ */
+export const getActivePackages = async (): Promise<ApiResponse<Package[]>> => {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.PACKAGES),
+      where('isActive', '==', true),
+      orderBy('price', 'asc')
+    );
+
+    const querySnapshot = await getDocs(q);
+    const packages = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Package[];
+
+    console.log(`Retrieved ${packages.length} active packages`);
+    return {
+      success: true,
+      data: packages
+    };
+  } catch (error) {
+    console.error(`Error getting active packages:`, error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
+};
+
 // ==================== EXPORT ALL SERVICES ====================
 
 export const services = {
@@ -747,7 +784,7 @@ export const getCustomers = customerService.getAll;
 export const getCustomerById = customerService.getById;
 export const updateCustomer = customerService.update;
 export const deleteCustomer = customerService.delete;
-export const getCustomersByStatus = customerService.getByStatus;
+// getCustomersByStatus already exported from optimized function above
 
 export const addPackage = packageService.create;
 export const getPackages = packageService.getActive;
