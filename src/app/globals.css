@@ -255,6 +255,88 @@
   color: #1B2336;
 }
 
+/* Pagination button styling - NUCLEAR APPROACH */
+.pagination-nav-btn {
+  background-color: #1B2336 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #FFFFFF !important;
+  transition: all 0.3s ease;
+}
+
+.pagination-nav-btn:hover {
+  background-color: #FFFFFF !important;
+  color: #1B2336 !important;
+  border-color: #FFFFFF !important;
+}
+
+/* Override ALL disabled states - NUCLEAR */
+.pagination-nav-btn:disabled,
+.pagination-nav-btn[disabled],
+.pagination-nav-btn.disabled,
+.pagination-nav-btn[data-disabled],
+button.pagination-nav-btn:disabled,
+button.pagination-nav-btn[disabled] {
+  background-color: #1B2336 !important;
+  color: #A0A8B8 !important;
+  border-color: #1B2336 !important;
+  cursor: not-allowed !important;
+  opacity: 0.5 !important;
+  pointer-events: none !important;
+}
+
+/* Override shadcn Button disabled opacity */
+button.pagination-nav-btn:disabled,
+button.pagination-nav-btn[disabled] {
+  opacity: 0.5 !important;
+  background-color: #1B2336 !important;
+  color: #A0A8B8 !important;
+  border-color: #1B2336 !important;
+}
+
+/* Force override any disabled state from any source */
+[data-disabled="true"].pagination-nav-btn,
+.pagination-nav-btn[data-disabled="true"],
+[aria-disabled="true"].pagination-nav-btn {
+  background-color: #1B2336 !important;
+  color: #A0A8B8 !important;
+  border-color: #1B2336 !important;
+  opacity: 0.5 !important;
+}
+
+/* Remove ring effect from active pagination button */
+.pagination-nav-btn:focus,
+.pagination-nav-btn:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Pagination info text styling */
+.pagination-info {
+  color: #1B2336 !important;
+  font-weight: 500 !important;
+}
+
+/* Page number buttons (different from navigation buttons) */
+.pagination-page-btn {
+  background-color: transparent;
+  color: #1B2336;
+  border: 1px solid #1B2336;
+  transition: all 0.3s ease;
+}
+
+.pagination-page-btn:hover {
+  background-color: rgba(27, 35, 54, 0.1);
+  color: #1B2336;
+  border-color: #1B2336;
+}
+
+.pagination-page-btn.active {
+  background-color: #1B2336 !important;
+  color: #FFFFFF !important;
+  border-color: #1B2336 !important;
+  box-shadow: none !important;
+}
+
 /* Table header styling - VERY SPECIFIC OVERRIDE */
 .table-header-white {
   background-color: #FFFFFF !important;

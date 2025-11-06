@@ -583,8 +583,8 @@ export default function AllCustomersPage() {
 
       {/* Pagination Component */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-4 px-4">
-          <div className="text-sm text-gray-300">
+        <div className="flex flex-col items-center justify-center mt-4 gap-2 px-4">
+          <div className="text-sm text-gray-300 pagination-info">
             Menampilkan {indexOfFirstItem + 1} hingga {Math.min(indexOfLastItem, filteredCustomers.length)} dari {filteredCustomers.length} pelanggan
           </div>
 
@@ -592,9 +592,15 @@ export default function AllCustomersPage() {
             <Button
               onClick={goToPreviousPage}
               disabled={currentPage === 1}
-              className="custom-btn px-3 py-1"
-              variant="outline"
+              className="pagination-nav-btn px-3 py-1"
               size="sm"
+              style={{
+                backgroundColor: currentPage === 1 ? '#1B2336' : '#FFFFFF',
+                color: currentPage === 1 ? '#A0A8B8' : '#1B2336',
+                borderColor: currentPage === 1 ? '#1B2336' : '#FFFFFF',
+                opacity: 1,
+                pointerEvents: currentPage === 1 ? 'none' : 'auto'
+              }}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -617,12 +623,11 @@ export default function AllCustomersPage() {
                   <Button
                     key={pageNumber}
                     onClick={() => paginate(pageNumber)}
-                    className={`custom-btn px-3 py-1 text-sm ${
+                    className={`pagination-page-btn px-3 py-1 text-sm ${
                       currentPage === pageNumber
-                        ? 'ring-2 ring-blue-500'
+                        ? 'active'
                         : ''
                     }`}
-                    variant={currentPage === pageNumber ? 'default' : 'outline'}
                     size="sm"
                   >
                     {pageNumber}
@@ -634,9 +639,15 @@ export default function AllCustomersPage() {
             <Button
               onClick={goToNextPage}
               disabled={currentPage === totalPages}
-              className="custom-btn px-3 py-1"
-              variant="outline"
+              className="pagination-nav-btn px-3 py-1"
               size="sm"
+              style={{
+                backgroundColor: currentPage === totalPages ? '#1B2336' : '#FFFFFF',
+                color: currentPage === totalPages ? '#A0A8B8' : '#1B2336',
+                borderColor: currentPage === totalPages ? '#1B2336' : '#FFFFFF',
+                opacity: 1,
+                pointerEvents: currentPage === totalPages ? 'none' : 'auto'
+              }}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
