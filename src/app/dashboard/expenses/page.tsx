@@ -27,7 +27,7 @@ import {
 import { ExpenseForm } from '@/components/wasa/expense-form';
 import { services } from '@/lib/firestore';
 import { Expense } from '@/lib/types';
-import { generateExpensePDFReport } from '@/utils/pdfGenerator';
+import { generateExpensePDFReport } from '@/utils/pdfLoader';
 import { formatDate, toDate, formatCurrency } from '@/utils/dateUtils';
 import { Edit, Trash2, DollarSign, TrendingDown, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -128,12 +128,12 @@ export default function ExpensesPage() {
 
   const selectedMonthExpenses = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     try {
       const monthYearText = selectedMonth !== 0
         ? `-${new Date(selectedYear, selectedMonth - 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}`
         : '';
-      generateExpensePDFReport(filteredExpenses, `Laporan-Biaya${monthYearText}.pdf`);
+      await generateExpensePDFReport(filteredExpenses, `Laporan-Biaya${monthYearText}.pdf`);
     } catch (error) {
       // Handle PDF generation error
     }

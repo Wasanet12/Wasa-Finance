@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { services } from '@/lib/firestore';
 import { Customer, Expense } from '@/lib/types';
-import { generatePDFReport } from '@/utils/pdfGenerator';
+import { generatePDFReport } from '@/utils/pdfLoader';
 import { toDate } from '@/utils/dateUtils';
 import { LayoutDashboard, DollarSign, Users, TrendingUp, TrendingDown, Building2, UserCheck, Download, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
 import {
@@ -428,7 +428,7 @@ export default function DashboardPage() {
       .slice(0, 5);
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     // Get filtered data
     const { filteredCustomers, filteredExpenses } = getFilteredData();
 

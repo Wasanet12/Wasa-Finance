@@ -28,7 +28,7 @@ import { CustomerForm } from '@/components/wasa/customer-form';
 import { MarkUnpaidForm } from '@/components/wasa/mark-unpaid-form';
 import { Customer } from '@/lib/types';
 import { getCustomers, deleteCustomer } from '@/lib/firestore';
-import { generateCustomerPDFReport } from '@/utils/pdfGenerator';
+import { generateCustomerPDFReport } from '@/utils/pdfLoader';
 import { formatDate, formatCurrency, toDate } from '@/utils/dateUtils';
 import { Search, Edit, Trash2, Users, UserCheck, DollarSign, Building2, Tag, Download, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -217,9 +217,9 @@ export default function AllCustomersPage() {
     .filter(customer => customer.discountAmount && customer.discountAmount > 0)
     .reduce((sum, customer) => sum + customer.discountAmount, 0);
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     try {
-      generateCustomerPDFReport(filteredCustomers, 'Daftar Semua Pelanggan', `Daftar-Pelanggan-${new Date().toISOString().split('T')[0]}.pdf`);
+      await generateCustomerPDFReport(filteredCustomers, 'Daftar Semua Pelanggan', `Daftar-Pelanggan-${new Date().toISOString().split('T')[0]}.pdf`);
       console.log('Customer PDF report generated successfully');
     } catch (error) {
       console.error('Error generating customer PDF report:', error);
