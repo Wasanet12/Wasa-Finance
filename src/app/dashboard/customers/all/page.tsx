@@ -28,7 +28,7 @@ import { CustomerForm } from '@/components/wasa/customer-form';
 import { MarkUnpaidForm } from '@/components/wasa/mark-unpaid-form';
 import { Customer } from '@/lib/types';
 import { getCustomers, deleteCustomer } from '@/lib/firestore';
-import { generateCustomerPDFReport } from '@/utils/pdfGenerator';
+import { generateCustomerPDFReport } from '@/utils/pdfLoader';
 import { formatDate, formatCurrency, toDate } from '@/utils/dateUtils';
 import { Search, Edit, Trash2, Users, UserCheck, DollarSign, Building2, Tag, Download, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -217,9 +217,9 @@ export default function AllCustomersPage() {
     .filter(customer => customer.discountAmount && customer.discountAmount > 0)
     .reduce((sum, customer) => sum + customer.discountAmount, 0);
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     try {
-      generateCustomerPDFReport(filteredCustomers, 'Daftar Semua Pelanggan', `Daftar-Pelanggan-${new Date().toISOString().split('T')[0]}.pdf`);
+      await generateCustomerPDFReport(filteredCustomers, 'Daftar Semua Pelanggan', `Daftar-Pelanggan-${new Date().toISOString().split('T')[0]}.pdf`);
       console.log('Customer PDF report generated successfully');
     } catch (error) {
       console.error('Error generating customer PDF report:', error);
@@ -253,7 +253,8 @@ export default function AllCustomersPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+      <section className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5" aria-labelledby="summary-heading">
+        <h2 id="summary-heading" className="sr-only">Customer Summary</h2>
         <Card className="border-border" style={{ backgroundColor: '#1B2336' }}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-xs sm:text-sm font-medium" style={{ color: '#FFFFFF' }}>
@@ -338,9 +339,11 @@ export default function AllCustomersPage() {
             </p>
           </CardContent>
         </Card>
-      </div>
+      </section>
 
-      <Card className="border-border" style={{ backgroundColor: '#1B2336' }}>
+      <section aria-labelledby="customer-table-heading">
+        <h2 id="customer-table-heading" className="sr-only">Customer List Table</h2>
+        <Card className="border-border" style={{ backgroundColor: '#1B2336' }}>
         <CardHeader className="pb-3 sm:pb-6">
           <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2" style={{ color: '#FFFFFF' }}>
             <span className="text-lg sm:text-xl">Daftar Pelanggan</span>
@@ -654,6 +657,7 @@ export default function AllCustomersPage() {
           </div>
         </div>
       )}
+      </section>
     </div>
   );
 }
