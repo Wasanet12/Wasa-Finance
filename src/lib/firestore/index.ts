@@ -784,7 +784,7 @@ export const getCustomers = customerService.getAll;
 export const getCustomerById = customerService.getById;
 export const updateCustomer = customerService.update;
 export const deleteCustomer = customerService.delete;
-export const getCustomersByStatus = customerService.getByStatus;
+// getCustomersByStatus already exported from optimized function above
 
 export const addPackage = packageService.create;
 export const getPackages = packageService.getActive;
