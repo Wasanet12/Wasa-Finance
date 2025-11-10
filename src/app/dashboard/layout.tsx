@@ -47,7 +47,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen" style={{ backgroundColor: '#FFFFFF' }}>
+    <div className="flex min-h-screen" style={{ backgroundColor: '#FFFFFF' }}>
       {/* Mobile & Tablet Sidebar Overlay */}
       {sidebarOpen && (
         <div
@@ -58,7 +58,7 @@ export default function DashboardLayout({
 
       {/* Mobile & Tablet Sidebar */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out md:hidden
+        fixed inset-y-0 left-0 z-50 w-64 h-full transform transition-transform duration-300 ease-in-out md:hidden
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `} style={{ backgroundColor: '#1B2336' }}>
         <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: '#3D4558' }}>
@@ -78,7 +78,7 @@ export default function DashboardLayout({
       </aside>
 
       {/* Desktop & Tablet Sidebar */}
-      <aside className="hidden md:flex w-64 flex-col border-r border-border" style={{ backgroundColor: '#1B2336' }}>
+      <aside className="hidden md:flex w-64 flex-col border-r border-border h-screen sticky top-0" style={{ backgroundColor: '#1B2336' }}>
         <Sidebar />
       </aside>
 
