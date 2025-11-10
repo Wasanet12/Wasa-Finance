@@ -233,7 +233,8 @@ export default function PackagesPage() {
             </div>
           </div>
 
-          <div className="rounded-lg border table-container-rounded" style={{ borderColor: '#3D4558', borderRadius: '0.5rem', overflow: 'hidden' }}>
+          {/* Desktop Table - Hidden on mobile */}
+          <div className="hidden md:block rounded-lg border table-container-rounded" style={{ borderColor: '#3D4558', borderRadius: '0.5rem', overflow: 'hidden' }}>
             <Table>
               <TableHeader className="table-header-white">
                 <TableRow className="table-row-hover">
@@ -304,6 +305,78 @@ export default function PackagesPage() {
                 )}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Mobile Cards - Visible only on mobile */}
+          <div className="md:hidden space-y-3">
+            {filteredPackages.length === 0 ? (
+              <div className="text-center py-8 text-white">
+                {searchTerm
+                  ? 'Tidak ada paket yang cocok dengan pencarian.'
+                  : 'Belum ada data paket layanan.'}
+              </div>
+            ) : (
+              currentItems.map((pkg) => (
+                <Card key={pkg.id} className="border-[#3D4558]" style={{ backgroundColor: '#2D3548' }}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-white text-lg mb-1">{pkg.name}</h3>
+                        <p className="text-[#FBBF24] font-bold text-lg">{formatCurrency(pkg.price)}</p>
+                        <p className="text-[#A0A8B8] text-sm">{formatDate(pkg.createdAt)}</p>
+                      </div>
+                    </div>
+                    <div className="flex justify-end space-x-2 mt-4">
+                      <PackageForm
+                        pkg={pkg}
+                        onSuccess={fetchPackages}
+                        trigger={
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="custom-btn h-10 w-10 p-0"
+                            aria-label="Edit paket"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        }
+                      />
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="custom-btn h-10 w-10 p-0"
+                            aria-label="Hapus paket"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent style={{ backgroundColor: '#1B2336' }} className="w-11/12 max-w-md">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle style={{ color: '#FFFFFF' }}>Hapus Paket</AlertDialogTitle>
+                            <AlertDialogDescription style={{ color: '#FFFFFF' }}>
+                              Apakah Anda yakin ingin menghapus paket &quot;{pkg.name}&quot;?
+                              Tindakan ini tidak dapat dibatalkan.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter className="flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
+                            <AlertDialogCancel className="w-full sm:w-auto">Batal</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeletePackage(pkg.id!)}
+                              className="custom-btn w-full sm:w-auto"
+                              style={{ backgroundColor: '#EF4444' }}
+                            >
+                              Hapus
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>
