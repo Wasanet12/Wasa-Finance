@@ -59,5 +59,4 @@ const nextConfig = {
   }),
 };
 
-// Temporarily disable PWA completely
 module.exports = nextConfig;
