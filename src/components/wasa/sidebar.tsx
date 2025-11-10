@@ -76,7 +76,7 @@ export function Sidebar({ className }: SidebarProps) {
               <img
                 src="/WASAA.jpg"
                 alt="Wasa Finance Logo"
-                className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl object-cover shadow-sm"
+                className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl object-cover shadow-sm w-full max-w-[48px] h-auto"
               />
             </div>
             <div className="min-w-0 flex-1">

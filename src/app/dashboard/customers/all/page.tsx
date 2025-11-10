@@ -128,6 +128,7 @@ export default function AllCustomersPage() {
       'active': { backgroundColor: '#10B981', color: '#FFFFFF' },
       'inactive': { backgroundColor: '#EF4444', color: '#FFFFFF' },
       'Belum Bayar': { backgroundColor: '#F59E0B', color: '#FFFFFF' },
+      'pending': { backgroundColor: '#8B5CF6', color: '#FFFFFF' },
       'Off': { backgroundColor: '#6B7280', color: '#FFFFFF' },
     };
 
@@ -139,6 +140,7 @@ export default function AllCustomersPage() {
       'active': 'Aktif',
       'inactive': 'Tidak Aktif',
       'Belum Bayar': 'Belum Bayar',
+      'pending': 'Pending',
       'Off': 'Off',
     };
 
@@ -229,10 +231,10 @@ export default function AllCustomersPage() {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center space-x-2">
           <Users className="h-5 w-5 sm:h-6 sm:w-6" style={{ color: '#1B2336' }} />
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold" style={{ color: '#1B2336' }}>
+          <h1 className="text-xl sm:text-xl md:text-2xl lg:text-3xl font-bold" style={{ color: '#1B2336' }}>
             Semua Pelanggan
           </h1>
         </div>
@@ -253,7 +255,7 @@ export default function AllCustomersPage() {
       </div>
 
       {/* Summary Cards */}
-      <section className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5" aria-labelledby="summary-heading">
+      <section className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5" aria-labelledby="summary-heading">
         <h2 id="summary-heading" className="sr-only">Customer Summary</h2>
         <Card className="border-border" style={{ backgroundColor: '#1B2336' }}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -263,7 +265,7 @@ export default function AllCustomersPage() {
             <Users className="h-3 w-3 sm:h-4 sm:w-4" style={{ color: '#FFFFFF' }} />
           </CardHeader>
           <CardContent className="p-3 sm:p-6">
-            <div className="text-lg sm:text-2xl font-bold" style={{ color: '#FFFFFF' }}>
+            <div className="text-base sm:text-lg lg:text-xl font-bold" style={{ color: '#FFFFFF' }}>
               {totalCustomers}
             </div>
             <p className="text-xs" style={{ color: '#FFFFFF' }}>
@@ -280,7 +282,7 @@ export default function AllCustomersPage() {
             <DollarSign className="h-3 w-3 sm:h-4 sm:w-4" style={{ color: '#FFFFFF' }} />
           </CardHeader>
           <CardContent className="p-3 sm:p-6">
-            <div className="text-lg sm:text-2xl font-bold" style={{ color: '#FFFFFF' }}>
+            <div className="text-base sm:text-lg lg:text-xl font-bold" style={{ color: '#FFFFFF' }}>
               {formatCurrency(totalRevenue)}
             </div>
             <p className="text-xs" style={{ color: '#FFFFFF' }}>
@@ -297,7 +299,7 @@ export default function AllCustomersPage() {
             <UserCheck className="h-3 w-3 sm:h-4 sm:w-4" style={{ color: '#FFFFFF' }} />
           </CardHeader>
           <CardContent className="p-3 sm:p-6">
-            <div className="text-lg sm:text-2xl font-bold" style={{ color: '#FFFFFF' }}>
+            <div className="text-base sm:text-lg lg:text-xl font-bold" style={{ color: '#FFFFFF' }}>
               {customersPayToWasa}
             </div>
             <p className="text-xs" style={{ color: '#FFFFFF' }}>
@@ -314,7 +316,7 @@ export default function AllCustomersPage() {
             <Building2 className="h-3 w-3 sm:h-4 sm:w-4" style={{ color: '#FFFFFF' }} />
           </CardHeader>
           <CardContent className="p-3 sm:p-6">
-            <div className="text-lg sm:text-2xl font-bold" style={{ color: '#FFFFFF' }}>
+            <div className="text-base sm:text-lg lg:text-xl font-bold" style={{ color: '#FFFFFF' }}>
               {customersPayToOffice}
             </div>
             <p className="text-xs" style={{ color: '#FFFFFF' }}>
@@ -331,7 +333,7 @@ export default function AllCustomersPage() {
             <Tag className="h-3 w-3 sm:h-4 sm:w-4" style={{ color: '#FFFFFF' }} />
           </CardHeader>
           <CardContent className="p-3 sm:p-6">
-            <div className="text-lg sm:text-2xl font-bold" style={{ color: '#FFFFFF' }}>
+            <div className="text-base sm:text-lg lg:text-xl font-bold" style={{ color: '#FFFFFF' }}>
               {formatCurrency(totalDiscount)}
             </div>
             <p className="text-xs" style={{ color: '#FFFFFF' }}>
@@ -436,8 +438,8 @@ export default function AllCustomersPage() {
                             customer={customer}
                             onSuccess={fetchCustomers}
                             trigger={
-                              <Button variant="outline" size="sm" className="custom-btn h-8 w-8 p-0" style={{ backgroundColor: '#F59E0B', borderColor: '#F59E0B', color: '#FFFFFF' }}>
-                                <AlertCircle className="h-3 w-3" />
+                              <Button variant="outline" size="sm" className="custom-btn h-11 w-11 p-0" style={{ backgroundColor: '#F59E0B', borderColor: '#F59E0B', color: '#FFFFFF' }}>
+                                <AlertCircle className="h-4 w-4" />
                               </Button>
                             }
                           />
@@ -446,15 +448,15 @@ export default function AllCustomersPage() {
                           customer={customer}
                           onSuccess={fetchCustomers}
                           trigger={
-                            <Button variant="outline" size="sm" className="custom-btn h-8 w-8 p-0">
-                              <Edit className="h-3 w-3" />
+                            <Button variant="outline" size="sm" className="custom-btn h-11 w-11 p-0">
+                              <Edit className="h-4 w-4" />
                             </Button>
                           }
                         />
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="outline" size="sm" className="custom-btn h-8 w-8 p-0">
-                              <Trash2 className="h-3 w-3" />
+                            <Button variant="outline" size="sm" className="custom-btn h-11 w-11 p-0">
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
@@ -486,7 +488,7 @@ export default function AllCustomersPage() {
           </div>
 
           {/* Desktop Table Layout */}
-          <div className="hidden lg:block rounded-lg border table-container-rounded" style={{ borderColor: '#3D4558', borderRadius: '0.5rem', overflow: 'hidden' }}>
+          <div className="hidden lg:block rounded-lg border table-container-rounded overflow-x-auto" style={{ borderColor: '#3D4558', borderRadius: '0.5rem' }}>
             <Table>
               <TableHeader className="table-header-white">
                 <TableRow className="table-row-hover">
@@ -529,7 +531,7 @@ export default function AllCustomersPage() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="custom-btn"
+                                  className="custom-btn h-11 min-w-[44px] px-3"
                                   title="Tandai sebagai Belum Bayar"
                                   style={{ backgroundColor: '#F59E0B', borderColor: '#F59E0B', color: '#FFFFFF' }}
                                 >
@@ -542,14 +544,14 @@ export default function AllCustomersPage() {
                             customer={customer}
                             onSuccess={fetchCustomers}
                             trigger={
-                              <Button variant="outline" size="sm" className="custom-btn">
+                              <Button variant="outline" size="sm" className="custom-btn h-11 min-w-[44px] px-3">
                                 <Edit className="h-4 w-4" />
                               </Button>
                             }
                           />
                             <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button variant="outline" size="sm" className="custom-btn">
+                              <Button variant="outline" size="sm" className="custom-btn h-11 min-w-[44px] px-3">
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </AlertDialogTrigger>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { SimpleAuthProvider } from "@/components/simple-auth-provider";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -11,6 +12,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Wasa Finance - Sistem Manajemen Keuangan Internal",
   description: "Sistem manajemen keuangan dan pelanggan internal untuk Wasa Finance",
+  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -21,6 +23,15 @@ export const metadata: Metadata = {
     description: "Sistem manajemen keuangan dan pelanggan internal untuk Wasa Finance",
     type: "website",
     locale: "id_ID",
+  },
+  icons: {
+    icon: [
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/icon-152x152.png", sizes: "152x152", type: "image/png" },
+    ],
   },
 };
 
@@ -40,9 +51,11 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body className={`${inter.variable} font-sans antialiased`}>
-        <SimpleAuthProvider>
-          {children}
-        </SimpleAuthProvider>
+        <ErrorBoundary>
+          <SimpleAuthProvider>
+            {children}
+          </SimpleAuthProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

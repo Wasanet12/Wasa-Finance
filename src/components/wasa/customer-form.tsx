@@ -37,8 +37,8 @@ const customerSchema = z.object({
   name: z.string().min(1, 'Nama pelanggan wajib diisi'),
   packageName: z.string().min(1, 'Pilih paket layanan'),
   packagePrice: z.number().min(0, 'Harga harus lebih dari 0'),
-  discountAmount: z.number().min(0).default(0),
-  status: z.enum(['active', 'inactive', 'Belum Bayar']),
+  discountAmount: z.number().min(0),
+  status: z.enum(['active', 'inactive', 'Belum Bayar', 'pending']),
   paymentTarget: z.enum(['Wasa', 'Kantor']),
 });
 

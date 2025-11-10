@@ -416,7 +416,7 @@ export default function DashboardPage() {
   const getTopCustomers = () => {
     const { filteredCustomers } = getFilteredData();
     return filteredCustomers
-      .filter(customer => customer.status === 'active' || customer.status === 'Sudah Bayar')
+      .filter(customer => customer.status === 'active')
       .sort((a, b) => (b.packagePrice - (b.discountAmount || 0)) - (a.packagePrice - (a.discountAmount || 0)))
       .slice(0, 5);
   };
@@ -438,6 +438,8 @@ export default function DashboardPage() {
       expenses: filteredExpenses,
       selectedMonth,
       selectedYear,
+      wasaRevenue: metrics.customersPayToWasa,
+      officeRevenue: metrics.customersPayToOffice,
       ...metrics,
     };
 
@@ -552,7 +554,7 @@ export default function DashboardPage() {
       {/* Financial Metrics - Responsive */}
       <section className="px-3 sm:px-4 lg:px-6" aria-labelledby="metrics-heading">
         <h2 id="metrics-heading" className="sr-only">Financial Metrics</h2>
-        <div className="grid gap-3 sm:gap-4 lg:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 md:gap-5 lg:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           <Card className="border-border shadow-lg transition-shadow" style={{ backgroundColor: '#1B2336' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
               <CardTitle className="text-xs sm:text-sm font-medium leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
@@ -561,7 +563,7 @@ export default function DashboardPage() {
               <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 transition-all duration-300" style={{ color: '#FFFFFF' }} />
             </CardHeader>
             <CardContent className="px-3 sm:px-4 pb-4 sm:pb-5">
-              <div className="text-base sm:text-lg md:text-xl font-bold truncate leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
+              <div className="text-base sm:text-lg lg:text-xl font-bold truncate leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
                 {formatCurrency(metrics.totalRevenue)}
               </div>
             </CardContent>
@@ -575,7 +577,7 @@ export default function DashboardPage() {
               <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 transition-all duration-300" style={{ color: '#FFFFFF' }} />
             </CardHeader>
             <CardContent className="px-3 sm:px-4 pb-4 sm:pb-5">
-              <div className="text-base sm:text-lg md:text-xl font-bold truncate leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
+              <div className="text-base sm:text-lg lg:text-xl font-bold truncate leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
                 {formatCurrency(metrics.wasaProfit)}
               </div>
             </CardContent>
@@ -599,7 +601,7 @@ export default function DashboardPage() {
                   <span className="text-red-400">-{formatCurrency(metrics.totalDiscount)}</span>
                 </div>
               </div>
-              <div className="text-base sm:text-lg md:text-xl font-bold truncate leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
+              <div className="text-base sm:text-lg lg:text-xl font-bold truncate leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
                 {formatCurrency(metrics.officeProfit)}
               </div>
             </CardContent>
@@ -613,17 +615,17 @@ export default function DashboardPage() {
               <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 transition-all duration-300" style={{ color: '#FFFFFF' }} />
             </CardHeader>
             <CardContent className="px-3 sm:px-4 pb-4 sm:pb-5">
-              <div className="text-base sm:text-lg md:text-xl font-bold truncate leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
+              <div className="text-base sm:text-lg lg:text-xl font-bold truncate leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
                 {formatCurrency(metrics.totalExpenses)}
               </div>
             </CardContent>
           </Card>
         </div>
-      </div>
+      </section>
 
       {/* Net Profit and Payment Metrics - Responsive */}
       <div className="px-3 sm:px-4 lg:px-6">
-        <div className="grid gap-3 sm:gap-4 lg:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 md:gap-5 lg:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           <Card className="border-border shadow-lg transition-shadow" style={{ backgroundColor: '#1B2336' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
               <CardTitle className="text-xs sm:text-sm font-medium leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
@@ -642,7 +644,7 @@ export default function DashboardPage() {
                   <span className="text-red-400">-{formatCurrency(metrics.totalExpenses)}</span>
                 </div>
               </div>
-              <div className="text-base sm:text-lg md:text-xl font-bold truncate leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
+              <div className="text-base sm:text-lg lg:text-xl font-bold truncate leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
                 {formatCurrency(metrics.wasaNetProfit)}
               </div>
             </CardContent>
@@ -656,7 +658,7 @@ export default function DashboardPage() {
               <UserCheck className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 transition-all duration-300" style={{ color: '#FFFFFF' }} />
             </CardHeader>
             <CardContent className="px-3 sm:px-4 pb-4 sm:pb-5">
-              <div className="text-base sm:text-lg md:text-xl font-bold leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
+              <div className="text-base sm:text-lg lg:text-xl font-bold leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
                 {metrics.customersPayToWasa}
               </div>
               <p className="text-xs mt-1 leading-snug truncate transition-all duration-300" style={{ color: '#FFFFFF' }}>
@@ -673,7 +675,7 @@ export default function DashboardPage() {
               <Building2 className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 transition-all duration-300" style={{ color: '#FFFFFF' }} />
             </CardHeader>
             <CardContent className="px-3 sm:px-4 pb-4 sm:pb-5">
-              <div className="text-base sm:text-lg md:text-xl font-bold leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
+              <div className="text-base sm:text-lg lg:text-xl font-bold leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
                 {metrics.customersPayToOffice}
               </div>
               <p className="text-xs mt-1 leading-snug truncate transition-all duration-300" style={{ color: '#FFFFFF' }}>
@@ -690,7 +692,7 @@ export default function DashboardPage() {
               <Users className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 transition-all duration-300" style={{ color: '#FFFFFF' }} />
             </CardHeader>
             <CardContent className="px-3 sm:px-4 pb-4 sm:pb-5">
-              <div className="text-base sm:text-lg md:text-xl font-bold leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
+              <div className="text-base sm:text-lg lg:text-xl font-bold leading-tight transition-all duration-300" style={{ color: '#FFFFFF' }}>
                 {metrics.totalActiveCustomers}
               </div>
               <p className="text-xs mt-1 leading-snug truncate transition-all duration-300" style={{ color: '#FFFFFF' }}>
@@ -873,7 +875,7 @@ export default function DashboardPage() {
         )}
 
         {/* Top Customers Table */}
-        <div className="grid gap-3 sm:gap-4 lg:gap-6 grid-cols-1 xl:grid-cols-2">
+        <div className="grid gap-3 sm:gap-4 md:gap-5 lg:gap-6 grid-cols-1 md:grid-cols-2">
           <Card className="border-border shadow-lg transition-shadow" style={{ backgroundColor: '#1B2336' }}>
             <CardHeader className="pb-3 sm:pb-4 px-3 sm:px-4 pt-4 sm:pt-5">
               <CardTitle className="flex items-center space-x-2 sm:space-x-3" style={{ color: '#FFFFFF' }}>
@@ -1041,7 +1043,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

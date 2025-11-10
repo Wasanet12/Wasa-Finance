@@ -50,12 +50,15 @@ export class PDFGenerator {
     }).format(amount);
   }
 
-  private formatDate(timestamp: { toDate: () => Date } | undefined): string {
-    if (!timestamp) return '-';
-    return timestamp.toDate().toLocaleDateString('id-ID');
+  private formatDate(date: Date | { toDate: () => Date } | undefined): string {
+    if (!date) return '-';
+    if (date instanceof Date) {
+      return date.toLocaleDateString('id-ID');
+    }
+    return date.toDate().toLocaleDateString('id-ID');
   }
 
-  private addHeader(title: string, selectedMonth: number, selectedYear: number): void {
+  private addHeader(title: string, selectedMonth: number, selectedYear: number): number {
     // Add header background
     this.doc.setFillColor(27, 35, 54); // #1B2336
     this.doc.rect(this.margin, this.margin, this.contentWidth, 30, 'F');

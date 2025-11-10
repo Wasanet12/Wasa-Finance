@@ -22,7 +22,7 @@ export interface Customer {
   discount?: number; // Total discount percentage for reporting
 
   // Payment Information
-  status: 'active' | 'inactive' | 'Belum Bayar';
+  status: 'active' | 'inactive' | 'Belum Bayar' | 'pending';
   paymentTarget: 'Wasa' | 'Kantor';
   paymentMethod?: 'cash' | 'transfer' | 'e-wallet' | 'credit_card';
   paymentDate?: Date;
@@ -264,7 +264,7 @@ export interface CustomerFormData {
   packagePrice: number;
   originalPrice: number;
   discountAmount: number;
-  status: 'active' | 'inactive' | 'Belum Bayar';
+  status: 'active' | 'inactive' | 'Belum Bayar' | 'pending';
   paymentTarget: 'Wasa' | 'Kantor';
   paymentMethod?: 'cash' | 'transfer' | 'e-wallet' | 'credit_card';
   paymentDate?: Date;

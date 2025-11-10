@@ -2,8 +2,17 @@ import { PDFReportData, Customer, Expense } from '@/lib/types';
 
 // Dynamic import for PDF generation
 export const generatePDFReport = async (data: PDFReportData, fileName?: string): Promise<void> => {
-  const { generatePDFReport: generateReport } = await import('@/utils/pdfGenerator');
-  generateReport(data, fileName);
+  const { PDFGenerator } = await import('@/utils/pdfGenerator');
+  const generator = new PDFGenerator();
+
+  // Transform data to match pdfGenerator interface
+  const transformedData = {
+    ...data,
+    wasaProfit: data.wasaRevenue || 0,
+    officeProfit: data.officeRevenue || 0,
+  };
+
+  generator.generateReport(transformedData, fileName);
 };
 
 export const generateCustomerPDFReport = async (customers: Customer[], title: string, fileName?: string): Promise<void> => {

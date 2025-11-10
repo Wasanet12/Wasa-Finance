@@ -36,7 +36,7 @@ import { Edit } from 'lucide-react';
 const reactivateCustomerSchema = z.object({
   packageName: z.string().min(1, 'Pilih paket layanan'),
   packagePrice: z.number().min(0, 'Harga harus lebih dari 0'),
-  discount: z.number().min(0).default(0),
+  discount: z.number().min(0),
   status: z.enum(['active']),
   paymentTarget: z.enum(['Wasa', 'Kantor']),
 });

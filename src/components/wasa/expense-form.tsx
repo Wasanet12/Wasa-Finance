@@ -58,7 +58,7 @@ export function ExpenseForm({ expense, onSuccess, trigger }: ExpenseFormProps) {
     defaultValues: {
       description: expense?.description || '',
       amount: expense?.amount || 0,
-      date: expense?.date ? expense.date.toDate().toISOString().split('T')[0] : '',
+      date: expense?.date ? expense.date.toISOString().split('T')[0] : '',
       category: expense?.category || 'Operasional',
     },
   });

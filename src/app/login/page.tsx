@@ -46,24 +46,25 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#1B2336] p-4">
-      <Card className="w-full max-w-md bg-[#FFFFFF]">
-        <CardHeader className="text-center">
+      <Card className="w-full max-w-md sm:max-w-lg bg-[#FFFFFF]">
+        <CardHeader className="text-center p-4 sm:p-6">
           <div className="flex justify-center mb-4">
             <Image
               src="/WASAA.jpg"
               alt="Wasa Finance Logo"
               width={80}
               height={80}
-              className="rounded-full"
+              className="rounded-full w-full max-w-[80px] h-auto"
+              priority
             />
           </div>
-          <CardTitle className="text-2xl font-bold text-[#1B2336]">Wasa Finance</CardTitle>
-          <CardDescription className="text-[#1B2336]">
+          <CardTitle className="text-xl sm:text-2xl font-bold text-[#1B2336]">Wasa Finance</CardTitle>
+          <CardDescription className="text-sm sm:text-base text-[#1B2336]">
             Masuk ke sistem manajemen keuangan internal
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <CardContent className="p-4 sm:p-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium text-[#1B2336]">
                 Email
@@ -75,7 +76,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Masukkan email"
                 required
-                className="bg-[#FFFFFF] border-[#1B2336] text-[#1B2336]"
+                className="bg-[#FFFFFF] border-[#1B2336] text-[#1B2336] h-11"
               />
             </div>
 
@@ -91,13 +92,13 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Masukkan password"
                   required
-                  className="bg-[#FFFFFF] border-[#1B2336] text-[#1B2336] pr-10"
+                  className="bg-[#FFFFFF] border-[#1B2336] text-[#1B2336] pr-12 h-11"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-[#1B2336]"
+                  className="absolute right-0 top-0 h-full w-11 min-w-[44px] hover:bg-transparent text-[#1B2336]"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
@@ -117,7 +118,7 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full custom-btn"
+              className="w-full custom-btn h-11 min-h-[44px]"
               disabled={loading || authLoading}
             >
               {loading || authLoading ? 'Sedang masuk...' : 'Login'}
