@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { SimpleAuthProvider } from "@/components/simple-auth-provider";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { PWAInstallPrompt } from "@/components/pwa-install-prompt";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -12,13 +13,28 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Wasa Finance - Sistem Manajemen Keuangan Internal",
   description: "Sistem manajemen keuangan dan pelanggan internal untuk Wasa Finance",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Wasa Finance",
+  },
   openGraph: {
     title: "Wasa Finance - Sistem Manajemen Keuangan Internal",
     description: "Sistem manajemen keuangan dan pelanggan internal untuk Wasa Finance",
     type: "website",
     locale: "id_ID",
   },
-  };
+  icons: {
+    icon: [
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/icon-152x152.png", sizes: "152x152", type: "image/png" },
+    ],
+  },
+};
 
 export const viewport = {
   width: 'device-width',
@@ -39,6 +55,7 @@ export default function RootLayout({
         <ErrorBoundary>
           <SimpleAuthProvider>
             {children}
+            <PWAInstallPrompt />
           </SimpleAuthProvider>
         </ErrorBoundary>
       </body>
