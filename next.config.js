@@ -29,8 +29,11 @@ const nextConfig = {
             lib: {
               test: /[\\/]node_modules[\\/]/,
               name(module) {
-                const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
-                return `npm.${packageName.replace('@', '')}`;
+                const match = module.context && module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/);
+                if (match && match[1]) {
+                  return `npm.${match[1].replace('@', '')}`;
+                }
+                return 'npm.unknown';
               },
               priority: 30,
               minChunks: 1,
