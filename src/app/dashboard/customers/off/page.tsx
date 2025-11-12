@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { services } from '@/lib/firestore';
 import { Customer } from '@/lib/types';
-import { PauseCircle, Edit, ChevronLeft, ChevronRight } from 'lucide-react';
+import { PauseCircle, Edit, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { formatDate, toDate } from '@/utils/dateUtils';
+import { generateCustomerPDFReport } from '@/utils/pdfLoader';
 import { ReactivateCustomerForm } from '@/components/wasa/reactivate-customer-form';
 import {
   Table,
@@ -138,6 +139,16 @@ export default function OffCustomersPage() {
   const goToPreviousPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
   const goToNextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
 
+  const handleDownloadPDF = async () => {
+    try {
+      await generateCustomerPDFReport(customers, 'Daftar Pelanggan Off', `Pelanggan-Off-${new Date().toISOString().split('T')[0]}.pdf`);
+      console.log('Off customers PDF report generated successfully');
+    } catch (error) {
+      console.error('Error generating off customers PDF report:', error);
+      alert('Gagal menghasilkan PDF. Silakan coba lagi.');
+    }
+  };
+
   // Calculate total discount for off customers
   const totalOffDiscount = customers
     .filter(customer => customer.discountAmount && customer.discountAmount > 0)
@@ -148,6 +159,21 @@ export default function OffCustomersPage() {
       <div className="flex items-center space-x-2">
         <PauseCircle className="h-6 w-6" style={{ color: '#1B2336' }} />
         <h1 className="text-3xl font-bold" style={{ color: '#1B2336' }}>Pelanggan Off</h1>
+      </div>
+
+      {/* Download Button */}
+      <div className="flex justify-end">
+        <Button
+          onClick={handleDownloadPDF}
+          className="custom-btn flex items-center justify-center space-x-2 px-4 py-2 text-sm sm:text-base"
+          style={{
+            minHeight: '44px', // Touch-friendly size
+          }}
+        >
+          <Download className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+          <span className="hidden sm:inline">Download PDF</span>
+          <span className="sm:hidden">Unduh PDF</span>
+        </Button>
       </div>
 
       {/* Summary Card */}

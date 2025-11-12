@@ -43,6 +43,63 @@ const expenseSchema = z.object({
 
 type ExpenseFormData = z.infer<typeof expenseSchema>;
 
+// Helper function to safely convert date to string format
+const safeDateToString = (dateInput: unknown): string => {
+  // Debug logging to understand the input
+  console.log('safeDateToString input:', dateInput, typeof dateInput);
+
+  // Return early for falsy values
+  if (!dateInput) return '';
+
+  try {
+    // Handle Firestore Timestamp objects
+    if (dateInput && typeof dateInput === 'object' && 'toDate' in dateInput) {
+      const timestamp = dateInput as { toDate: () => Date };
+      const date = timestamp.toDate();
+      if (isNaN(date.getTime())) {
+        console.warn('Invalid timestamp date:', dateInput);
+        return '';
+      }
+      return date.toISOString().split('T')[0];
+    }
+
+    // Convert to string for easier validation
+    const inputStr = String(dateInput).trim();
+    console.log('Converted to string:', inputStr);
+
+    // Check for clearly invalid string values first
+    if (!inputStr || inputStr === 'Invalid Date' || inputStr === 'undefined' || inputStr === 'null') {
+      console.warn('Invalid date string:', dateInput);
+      return '';
+    }
+
+    // Create Date object and immediately validate
+    const date = new Date(inputStr);
+    console.log('Created date object:', date, 'isNaN:', isNaN(date.getTime()));
+
+    // Check if the Date object is valid before any operations
+    if (isNaN(date.getTime())) {
+      console.warn('Invalid date constructed from:', dateInput, '-> Invalid Date');
+      return '';
+    }
+
+    // Additional sanity checks
+    const year = date.getFullYear();
+    if (year < 1900 || year > 2100) {
+      console.warn('Date year out of range:', year, 'from input:', dateInput);
+      return '';
+    }
+
+    // Now it's safe to call toISOString()
+    const result = date.toISOString().split('T')[0];
+    console.log('Final result:', result);
+    return result;
+  } catch (error) {
+    console.warn('Error in safeDateToString:', dateInput, error);
+    return '';
+  }
+};
+
 interface ExpenseFormProps {
   expense?: Expense;
   onSuccess?: () => void;
@@ -58,7 +115,7 @@ export function ExpenseForm({ expense, onSuccess, trigger }: ExpenseFormProps) {
     defaultValues: {
       description: expense?.description || '',
       amount: expense?.amount || 0,
-      date: expense?.date ? expense.date.toISOString().split('T')[0] : '',
+      date: safeDateToString(expense?.date),
       category: expense?.category || 'Operasional',
     },
   });

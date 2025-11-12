@@ -59,19 +59,46 @@ export class PDFGenerator {
 
   private formatDate(date: Date | { toDate: () => Date } | undefined): string {
     if (!date) return '-';
-    if (date instanceof Date) {
-      return date.toLocaleDateString('id-ID');
+    try {
+      if (date instanceof Date) {
+        return date.toLocaleDateString('id-ID', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric'
+        });
+      }
+      if (typeof date === 'object' && 'toDate' in date) {
+        return date.toDate().toLocaleDateString('id-ID', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric'
+        });
+      }
+      return '-';
+    } catch (error) {
+      console.warn('Error formatting date:', date, error);
+      return '-';
     }
-    return date.toDate().toLocaleDateString('id-ID');
   }
 
   private addHeader(title: string, selectedMonth: number, selectedYear: number): number {
     // Add header background
     this.doc.setFillColor(27, 35, 54); // #1B2336
-    this.doc.rect(this.margin, this.margin, this.contentWidth, 30, 'F');
+    this.doc.rect(this.margin, this.margin, this.contentWidth, 35, 'F');
 
-    // Add title in white
-    this.doc.setFontSize(18);
+    // Add company info
+    this.doc.setFontSize(20);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setTextColor(255, 255, 255);
+    this.doc.text('Wasa Finance', this.margin + 10, this.margin + 20);
+
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.setTextColor(255, 255, 255);
+    this.doc.text('Sistem Manajemen Keuangan', this.margin + 10, this.margin + 30);
+
+    // Add title in white centered
+    this.doc.setFontSize(14);
     this.doc.setFont('helvetica', 'bold');
     this.doc.setTextColor(255, 255, 255);
     this.doc.text(title, this.pageWidth / 2, this.margin + 20, { align: 'center' });
@@ -82,21 +109,21 @@ export class PDFGenerator {
       'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
     ];
 
-    this.doc.setFontSize(12);
+    this.doc.setFontSize(11);
     this.doc.setFont('helvetica', 'normal');
-    this.doc.setTextColor(0, 0, 0); // Reset to black
+    this.doc.setTextColor(27, 35, 54);
     const period = selectedMonth === 0
-      ? `Semua Data - Tahun ${selectedYear}`
+      ? `Laporan Tahun ${selectedYear}`
       : `Periode: ${months[selectedMonth]} ${selectedYear}`;
-    this.doc.text(period, this.pageWidth / 2, this.margin + 40, { align: 'center' });
+    this.doc.text(period, this.pageWidth / 2, this.margin + 50, { align: 'center' });
 
     // Add generation date
-    const generatedDate = `Dicetak: ${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}`;
-    this.doc.setFontSize(10);
-    this.doc.setTextColor(100, 100, 100); // Gray color
-    this.doc.text(generatedDate, this.pageWidth / 2, this.margin + 48, { align: 'center' });
+    const generatedDate = `Dicetak: ${new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })} ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
+    this.doc.setFontSize(9);
+    this.doc.setTextColor(27, 35, 54);
+    this.doc.text(generatedDate, this.pageWidth / 2, this.margin + 58, { align: 'center' });
 
-    return this.margin + 55; // Return Y position after header
+    return this.margin + 65; // Return Y position after header
   }
 
   private addSummaryMetrics(data: PDFReportData, startY: number): number {
@@ -196,15 +223,215 @@ export class PDFGenerator {
     return yPosition + 10; // Return Y position after summary
   }
 
+  private addCustomerSummary(customers: Customer[], startY: number): number {
+    let yPosition = startY;
+
+    // Calculate metrics
+    const totalRevenue = customers.reduce((sum, customer) => sum + (customer.packagePrice - (customer.discountAmount || 0)), 0);
+    const wasaRevenue = customers
+      .filter(customer => customer.paymentTarget === 'Wasa')
+      .reduce((sum, customer) => sum + (customer.packagePrice - (customer.discountAmount || 0)), 0);
+    const officeRevenue = customers
+      .filter(customer => customer.paymentTarget === 'Kantor')
+      .reduce((sum, customer) => sum + (customer.packagePrice - (customer.discountAmount || 0)), 0);
+    const wasaCustomers = customers.filter(customer => customer.paymentTarget === 'Wasa').length;
+    const officeCustomers = customers.filter(customer => customer.paymentTarget === 'Kantor').length;
+    const totalDiscount = customers.reduce((sum, customer) => sum + (customer.discountAmount || 0), 0);
+
+    // Section Title
+    this.doc.setFontSize(14);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setTextColor(27, 35, 54);
+    this.doc.text('Ringkasan Pelanggan', this.margin, yPosition);
+    yPosition += 15;
+
+    // Create minimal summary boxes
+    const boxWidth = this.contentWidth / 2 - 6;
+    const boxHeight = 40;
+    let currentX = this.margin;
+
+    // Total Customers Box
+    this.doc.setFillColor(27, 35, 54);
+    this.doc.rect(currentX, yPosition, boxWidth, boxHeight, 'F');
+
+    this.doc.setTextColor(255, 255, 255);
+    this.doc.setFontSize(10);
+    this.doc.text('Total Pelanggan', currentX + 8, yPosition + 15);
+    this.doc.setFontSize(18);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text(`${customers.length}`, currentX + 8, yPosition + 30);
+    this.doc.setFontSize(9);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text('pelanggan', currentX + 35, yPosition + 30);
+
+    // Total Revenue Box
+    currentX += boxWidth + 12;
+    this.doc.setFillColor(27, 35, 54);
+    this.doc.rect(currentX, yPosition, boxWidth, boxHeight, 'F');
+
+    this.doc.setTextColor(255, 255, 255);
+    this.doc.setFontSize(10);
+    this.doc.text('Total Pendapatan', currentX + 8, yPosition + 15);
+    this.doc.setFontSize(14);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text(this.formatCurrency(totalRevenue), currentX + 8, yPosition + 30);
+
+    yPosition += boxHeight + 12;
+    currentX = this.margin;
+
+    // Wasa Revenue Box
+    this.doc.setFillColor(27, 35, 54);
+    this.doc.rect(currentX, yPosition, boxWidth, boxHeight, 'F');
+
+    this.doc.setTextColor(255, 255, 255);
+    this.doc.setFontSize(10);
+    this.doc.text('Pendapatan Wasa', currentX + 8, yPosition + 15);
+    this.doc.setFontSize(14);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text(this.formatCurrency(wasaRevenue), currentX + 8, yPosition + 28);
+    this.doc.setFontSize(8);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text(`${wasaCustomers} pelanggan`, currentX + 8, yPosition + 35);
+
+    // Office Revenue Box
+    currentX += boxWidth + 12;
+    this.doc.setFillColor(27, 35, 54);
+    this.doc.rect(currentX, yPosition, boxWidth, boxHeight, 'F');
+
+    this.doc.setTextColor(255, 255, 255);
+    this.doc.setFontSize(10);
+    this.doc.text('Pendapatan Kantor', currentX + 8, yPosition + 15);
+    this.doc.setFontSize(14);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text(this.formatCurrency(officeRevenue), currentX + 8, yPosition + 28);
+    this.doc.setFontSize(8);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text(`${officeCustomers} pelanggan`, currentX + 8, yPosition + 35);
+
+    yPosition += boxHeight + 20;
+
+    // Simple Statistics Table
+    this.doc.setFontSize(12);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setTextColor(27, 35, 54);
+    this.doc.text('Statistik Lengkap', this.margin, yPosition);
+    yPosition += 10;
+
+    const statsData = [
+      ['Total Pelanggan', `${customers.length}`],
+      ['Pendapatan Kotor', this.formatCurrency(totalRevenue)],
+      ['Total Diskon', this.formatCurrency(totalDiscount)],
+      ['Pendapatan Wasa', this.formatCurrency(wasaRevenue)],
+      ['Pendapatan Kantor', this.formatCurrency(officeRevenue)],
+      ['Rata-rata per Pelanggan', this.formatCurrency(customers.length > 0 ? totalRevenue / customers.length : 0)],
+    ];
+
+    // Create simple table
+    const tableRowHeight = 8;
+    const colWidth = this.contentWidth / 2;
+
+    statsData.forEach(([label, value], index) => {
+      // Left column
+      this.doc.setFontSize(9);
+      this.doc.setTextColor(27, 35, 54);
+      this.doc.text(label, this.margin, yPosition + 5);
+
+      // Right column
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.text(value, this.margin + colWidth, yPosition + 5);
+
+      yPosition += tableRowHeight;
+    });
+
+    return yPosition + 15; // Return Y position after summary
+  }
+
+  private addCustomersTableWithSummary(customers: Customer[], startY: number): void {
+    // Check if we need a new page
+    if (startY > this.pageHeight - 60) {
+      this.doc.addPage();
+      startY = this.margin + 20;
+    }
+
+    // Add section header
+    this.doc.setFillColor(27, 35, 54);
+    this.doc.rect(this.margin, startY, this.contentWidth, 15, 'F');
+
+    this.doc.setFontSize(14);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setTextColor(255, 255, 255);
+    this.doc.text('Daftar Pelanggan', this.pageWidth / 2, startY + 10, { align: 'center' });
+
+    // Prepare table data for active customers
+    const tableData = customers.map(customer => [
+      customer.name,
+      customer.packageName,
+      this.formatCurrency(customer.packagePrice),
+      customer.discountAmount ? this.formatCurrency(customer.discountAmount) : 'Rp 0',
+      this.formatCurrency(customer.discountAmount ? customer.packagePrice - customer.discountAmount : customer.packagePrice),
+      customer.status,
+      customer.paymentTarget || 'Wasa',
+      this.formatDate(customer.createdAt)
+    ]);
+
+    // Add table with minimal styling
+    autoTable(this.doc, {
+      head: [['Nama', 'Paket', 'Harga', 'Diskon', 'Harga Final', 'Status', 'Bayar ke', 'Tanggal']],
+      body: tableData,
+      startY: startY + 25,
+      margin: { left: this.margin, right: this.margin, top: this.margin, bottom: this.margin },
+      pageBreak: 'auto',
+      styles: {
+        font: 'helvetica',
+        fontSize: 9,
+        cellPadding: 4,
+        lineColor: [27, 35, 54],
+        lineWidth: 0.1,
+        fillColor: [255, 255, 255],
+      },
+      headStyles: {
+        fillColor: [27, 35, 54],
+        textColor: 255,
+        fontStyle: 'bold',
+        fontSize: 10,
+        cellPadding: 5,
+      },
+      alternateRowStyles: {
+        fillColor: [248, 248, 248],
+      },
+      columnStyles: {
+        0: { cellWidth: 'auto' }, // Nama
+        1: { cellWidth: 'auto' }, // Paket
+        2: { cellWidth: 'auto', halign: 'right' }, // Harga
+        3: { cellWidth: 'auto', halign: 'right' }, // Diskon
+        4: { cellWidth: 'auto', halign: 'right', fontStyle: 'bold' }, // Harga Final
+        5: { cellWidth: 'auto' }, // Status
+        6: { cellWidth: 'auto' }, // Bayar ke
+        7: { cellWidth: 'auto' }, // Tanggal
+      },
+      didDrawPage: (data) => {
+        // Add footer on each page
+        this.doc.setFontSize(8);
+        this.doc.setTextColor(27, 35, 54);
+        this.doc.text(
+          `Halaman ${data.pageNumber} - Dicetak: ${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}`,
+          this.pageWidth / 2,
+          this.pageHeight - 10,
+          { align: 'center' }
+        );
+      }
+    });
+  }
+
   private addCustomersTable(customers: Customer[]): void {
     // Add new page for customers table
     this.doc.addPage();
 
     // Add page header
-    this.doc.setFillColor(27, 35, 54); // #1B2336
+    this.doc.setFillColor(27, 35, 54);
     this.doc.rect(this.margin, this.margin, this.contentWidth, 15, 'F');
 
-    this.doc.setFontSize(16);
+    this.doc.setFontSize(14);
     this.doc.setFont('helvetica', 'bold');
     this.doc.setTextColor(255, 255, 255);
     this.doc.text('Daftar Pelanggan', this.pageWidth / 2, this.margin + 10, { align: 'center' });
@@ -221,7 +448,7 @@ export class PDFGenerator {
       this.formatDate(customer.createdAt)
     ]);
 
-    // Add full-width table
+    // Add table with minimal styling
     autoTable(this.doc, {
       head: [['Nama', 'Paket', 'Harga', 'Diskon', 'Harga Final', 'Status', 'Bayar ke', 'Tanggal']],
       body: tableData,
@@ -232,8 +459,9 @@ export class PDFGenerator {
         font: 'helvetica',
         fontSize: 9,
         cellPadding: 4,
-        lineColor: [200, 200, 200],
+        lineColor: [27, 35, 54],
         lineWidth: 0.1,
+        fillColor: [255, 255, 255],
       },
       headStyles: {
         fillColor: [27, 35, 54],
@@ -246,7 +474,7 @@ export class PDFGenerator {
         fillColor: [248, 248, 248],
       },
       columnStyles: {
-        0: { cellWidth: 'auto' }, // Nama - auto width
+        0: { cellWidth: 'auto' }, // Nama
         1: { cellWidth: 'auto' }, // Paket
         2: { cellWidth: 'auto', halign: 'right' }, // Harga
         3: { cellWidth: 'auto', halign: 'right' }, // Diskon
@@ -258,7 +486,7 @@ export class PDFGenerator {
       didDrawPage: (data) => {
         // Add footer
         this.doc.setFontSize(8);
-        this.doc.setTextColor(128, 128, 128);
+        this.doc.setTextColor(27, 35, 54);
         this.doc.text(
           `Halaman ${data.pageNumber} - Dicetak: ${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}`,
           this.pageWidth / 2,
@@ -274,10 +502,10 @@ export class PDFGenerator {
     this.doc.addPage();
 
     // Add page header
-    this.doc.setFillColor(27, 35, 54); // #1B2336
+    this.doc.setFillColor(27, 35, 54);
     this.doc.rect(this.margin, this.margin, this.contentWidth, 15, 'F');
 
-    this.doc.setFontSize(16);
+    this.doc.setFontSize(14);
     this.doc.setFont('helvetica', 'bold');
     this.doc.setTextColor(255, 255, 255);
     this.doc.text('Daftar Biaya Operasional', this.pageWidth / 2, this.margin + 10, { align: 'center' });
@@ -290,7 +518,7 @@ export class PDFGenerator {
       this.formatDate(expense.date)
     ]);
 
-    // Add full-width table
+    // Add table with minimal styling
     autoTable(this.doc, {
       head: [['Deskripsi', 'Kategori', 'Jumlah', 'Tanggal']],
       body: tableData,
@@ -301,8 +529,9 @@ export class PDFGenerator {
         font: 'helvetica',
         fontSize: 9,
         cellPadding: 4,
-        lineColor: [200, 200, 200],
+        lineColor: [27, 35, 54],
         lineWidth: 0.1,
+        fillColor: [255, 255, 255],
       },
       headStyles: {
         fillColor: [27, 35, 54],
@@ -323,7 +552,7 @@ export class PDFGenerator {
       didDrawPage: (data) => {
         // Add footer
         this.doc.setFontSize(8);
-        this.doc.setTextColor(128, 128, 128);
+        this.doc.setTextColor(27, 35, 54);
         this.doc.text(
           `Halaman ${data.pageNumber} - Dicetak: ${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}`,
           this.pageWidth / 2,
@@ -361,10 +590,13 @@ export class PDFGenerator {
 
   public generateCustomerReport(customers: Customer[], title: string, fileName?: string): void {
     // Add header
-    this.addHeader(title, 0, new Date().getFullYear());
+    const headerEndY = this.addHeader(title, 0, new Date().getFullYear());
+
+    // Add customer summary
+    const summaryEndY = this.addCustomerSummary(customers, headerEndY);
 
     // Add customers table
-    this.addCustomersTable(customers);
+    this.addCustomersTableWithSummary(customers, summaryEndY);
 
     // Save the PDF
     this.doc.save(fileName || `Daftar-Pelanggan-${new Date().toISOString().split('T')[0]}.pdf`);

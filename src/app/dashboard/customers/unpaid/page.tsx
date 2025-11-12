@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { services } from '@/lib/firestore';
 import { Customer } from '@/lib/types';
-import { UserX, AlertTriangle, TrendingUp, Edit, Percent, ChevronLeft, ChevronRight } from 'lucide-react';
+import { UserX, AlertTriangle, TrendingUp, Edit, Percent, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { formatDate, formatCurrency, toDate } from '@/utils/dateUtils';
+import { generateCustomerPDFReport } from '@/utils/pdfLoader';
 import {
   Table,
   TableBody,
@@ -119,6 +120,16 @@ export default function UnpaidCustomersPage() {
     return formatCurrency(customer.packagePrice);
   };
 
+  const handleDownloadPDF = async () => {
+    try {
+      await generateCustomerPDFReport(customers, 'Daftar Pelanggan Belum Bayar', `Pelanggan-Belum-Bayar-${new Date().toISOString().split('T')[0]}.pdf`);
+      console.log('Unpaid customers PDF report generated successfully');
+    } catch (error) {
+      console.error('Error generating unpaid customers PDF report:', error);
+      alert('Gagal menghasilkan PDF. Silakan coba lagi.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -132,6 +143,21 @@ export default function UnpaidCustomersPage() {
       <div className="flex items-center space-x-2">
         <UserX className="h-6 w-6" style={{ color: '#1B2336' }} />
         <h1 className="text-3xl font-bold" style={{ color: '#1B2336' }}>Pelanggan Belum Bayar</h1>
+      </div>
+
+      {/* Download Button */}
+      <div className="flex justify-end">
+        <Button
+          onClick={handleDownloadPDF}
+          className="custom-btn flex items-center justify-center space-x-2 px-4 py-2 text-sm sm:text-base"
+          style={{
+            minHeight: '44px', // Touch-friendly size
+          }}
+        >
+          <Download className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+          <span className="hidden sm:inline">Download PDF</span>
+          <span className="sm:hidden">Unduh PDF</span>
+        </Button>
       </div>
 
       {/* Pending Revenue Summary */}

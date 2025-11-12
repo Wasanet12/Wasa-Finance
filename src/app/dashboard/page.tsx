@@ -332,8 +332,8 @@ export default function DashboardPage() {
       totalPaymentToOffice,
     };
 
-    setMetrics(finalMetrics);
     calculateComparisonMetrics(finalMetrics);
+    return finalMetrics;
   }, [filteredCustomers, filteredExpenses, calculateComparisonMetrics]);
 
   const formatCurrency = (amount: number) => {
