@@ -126,7 +126,7 @@ export class PDFGenerator {
     return this.margin + 65; // Return Y position after header
   }
 
-  private addSummaryMetrics(data: PDFReportData, startY: number): number {
+  private addColorfulSummaryMetrics(data: PDFReportData, startY: number): number {
     let yPosition = startY;
 
     // Financial Summary Table
@@ -567,8 +567,8 @@ export class PDFGenerator {
     // Add header and get Y position
     const headerEndY = this.addHeader('Laporan Keuangan Wasa Finance', data.selectedMonth, data.selectedYear);
 
-    // Add summary metrics
-    this.addSummaryMetrics(data, headerEndY);
+    // Add colorful summary metrics for dashboard
+    this.addColorfulSummaryMetrics(data, headerEndY);
 
     // Add customers table if there are customers
     if (data.customers.length > 0) {
