@@ -24,6 +24,8 @@ export interface PDFReportData {
   customersPayToOffice: number;
   totalPaymentToWasa: number;
   totalPaymentToOffice: number;
+  officeToWasaPayment?: number;
+  wasaToOfficePayment?: number;
 }
 
 export class PDFGenerator {
@@ -84,24 +86,13 @@ export class PDFGenerator {
   private addHeader(title: string, selectedMonth: number, selectedYear: number): number {
     // Add header background
     this.doc.setFillColor(27, 35, 54); // #1B2336
-    this.doc.rect(this.margin, this.margin, this.contentWidth, 35, 'F');
-
-    // Add company info
-    this.doc.setFontSize(20);
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.setTextColor(255, 255, 255);
-    this.doc.text('Wasa Finance', this.margin + 10, this.margin + 20);
-
-    this.doc.setFontSize(10);
-    this.doc.setFont('helvetica', 'normal');
-    this.doc.setTextColor(255, 255, 255);
-    this.doc.text('Sistem Manajemen Keuangan', this.margin + 10, this.margin + 30);
+    this.doc.rect(this.margin, this.margin, this.contentWidth, 25, 'F');
 
     // Add title in white centered
-    this.doc.setFontSize(14);
+    this.doc.setFontSize(16);
     this.doc.setFont('helvetica', 'bold');
     this.doc.setTextColor(255, 255, 255);
-    this.doc.text(title, this.pageWidth / 2, this.margin + 20, { align: 'center' });
+    this.doc.text(title, this.pageWidth / 2, this.margin + 18, { align: 'center' });
 
     // Add period info below header
     const months = [
@@ -115,15 +106,15 @@ export class PDFGenerator {
     const period = selectedMonth === 0
       ? `Laporan Tahun ${selectedYear}`
       : `Periode: ${months[selectedMonth]} ${selectedYear}`;
-    this.doc.text(period, this.pageWidth / 2, this.margin + 50, { align: 'center' });
+    this.doc.text(period, this.pageWidth / 2, this.margin + 40, { align: 'center' });
 
     // Add generation date
     const generatedDate = `Dicetak: ${new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })} ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
     this.doc.setFontSize(9);
     this.doc.setTextColor(27, 35, 54);
-    this.doc.text(generatedDate, this.pageWidth / 2, this.margin + 58, { align: 'center' });
+    this.doc.text(generatedDate, this.pageWidth / 2, this.margin + 48, { align: 'center' });
 
-    return this.margin + 65; // Return Y position after header
+    return this.margin + 55; // Return Y position after header
   }
 
   private addColorfulSummaryMetrics(data: PDFReportData, startY: number): number {
@@ -189,8 +180,10 @@ export class PDFGenerator {
     const paymentData = [
       ['Pelanggan Bayar ke Wasa', `${data.customersPayToWasa} pelanggan`],
       ['Total Pembayaran ke Wasa', this.formatCurrency(data.totalPaymentToWasa)],
+      ['Wasa Bayar ke Kantor', this.formatCurrency(data.wasaToOfficePayment || 0)],
       ['Pelanggan Bayar ke Kantor', `${data.customersPayToOffice} pelanggan`],
       ['Total Pembayaran ke Kantor', this.formatCurrency(data.totalPaymentToOffice)],
+      ['Kantor Bayar ke Wasa', this.formatCurrency(data.officeToWasaPayment || 0)],
     ];
 
     // Header row
@@ -420,6 +413,147 @@ export class PDFGenerator {
     });
   }
 
+  private addExpenseSummary(expenses: Expense[], startY: number): number {
+    let yPosition = startY;
+
+    // Calculate expense metrics
+    const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+
+    // Get categories
+    const categories = [...new Set(expenses.map(expense => expense.category).filter(Boolean))];
+    const categoryCounts = categories.reduce((acc, category) => {
+      acc[category] = expenses.filter(e => e.category === category).length;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Section Title
+    this.doc.setFontSize(14);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setTextColor(27, 35, 54);
+    this.doc.text('Ringkasan Biaya Operasional', this.margin, yPosition);
+    yPosition += 15;
+
+    // Create summary boxes similar to customer summary
+    const boxWidth = this.contentWidth / 2 - 6;
+    const boxHeight = 40;
+    let currentX = this.margin;
+
+    // Total Expenses Box
+    this.doc.setFillColor(27, 35, 54);
+    this.doc.rect(currentX, yPosition, boxWidth, boxHeight, 'F');
+
+    this.doc.setTextColor(255, 255, 255);
+    this.doc.setFontSize(10);
+    this.doc.text('Total Biaya', currentX + 8, yPosition + 15);
+    this.doc.setFontSize(18);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text(this.formatCurrency(totalExpenses), currentX + 8, yPosition + 30);
+    this.doc.setFontSize(9);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text('semua biaya', currentX + 35, yPosition + 30);
+
+    // Total Transactions Box
+    currentX += boxWidth + 12;
+    this.doc.setFillColor(27, 35, 54);
+    this.doc.rect(currentX, yPosition, boxWidth, boxHeight, 'F');
+
+    this.doc.setTextColor(255, 255, 255);
+    this.doc.setFontSize(10);
+    this.doc.text('Total Transaksi', currentX + 8, yPosition + 15);
+    this.doc.setFontSize(18);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text(`${expenses.length}`, currentX + 8, yPosition + 30);
+    this.doc.setFontSize(9);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text('transaksi', currentX + 35, yPosition + 30);
+
+    yPosition += boxHeight + 12;
+    currentX = this.margin;
+
+    // Categories Box
+    this.doc.setFillColor(27, 35, 54);
+    this.doc.rect(currentX, yPosition, boxWidth, boxHeight, 'F');
+
+    this.doc.setTextColor(255, 255, 255);
+    this.doc.setFontSize(10);
+    this.doc.text('Kategori', currentX + 8, yPosition + 15);
+    this.doc.setFontSize(18);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text(`${categories.length}`, currentX + 8, yPosition + 30);
+    this.doc.setFontSize(9);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text('kategori', currentX + 35, yPosition + 30);
+
+    // Average Expense Box
+    currentX += boxWidth + 12;
+    this.doc.setFillColor(27, 35, 54);
+    this.doc.rect(currentX, yPosition, boxWidth, boxHeight, 'F');
+
+    this.doc.setTextColor(255, 255, 255);
+    this.doc.setFontSize(10);
+    this.doc.text('Rata-rata', currentX + 8, yPosition + 15);
+    this.doc.setFontSize(14);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text(this.formatCurrency(expenses.length > 0 ? totalExpenses / expenses.length : 0), currentX + 8, yPosition + 28);
+    this.doc.setFontSize(8);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text('per transaksi', currentX + 8, yPosition + 35);
+
+    yPosition += boxHeight + 20;
+
+    // Category Breakdown Table
+    if (categories.length > 0) {
+      this.doc.setFontSize(12);
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.setTextColor(27, 35, 54);
+      this.doc.text('Breakdown Kategori', this.margin, yPosition);
+      yPosition += 10;
+
+      const categoryData = categories.map(category => {
+        const categoryExpenses = expenses.filter(e => e.category === category);
+        const categoryTotal = categoryExpenses.reduce((sum, e) => sum + e.amount, 0);
+        return [category, `${categoryCounts[category]} transaksi`, this.formatCurrency(categoryTotal)];
+      });
+
+      // Create simple table
+      const tableRowHeight = 8;
+      const colWidths = [this.contentWidth * 0.4, this.contentWidth * 0.3, this.contentWidth * 0.3];
+
+      // Header row
+      this.doc.setFillColor(27, 35, 54);
+      this.doc.rect(this.margin, yPosition, this.contentWidth, tableRowHeight, 'F');
+      this.doc.setTextColor(255, 255, 255);
+      this.doc.setFontSize(10);
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.text('Kategori', this.margin + 2, yPosition + 5);
+      this.doc.text('Jumlah', this.margin + colWidths[0] + 2, yPosition + 5);
+      this.doc.text('Total', this.margin + colWidths[0] + colWidths[1] + 2, yPosition + 5);
+
+      yPosition += tableRowHeight;
+
+      // Data rows
+      this.doc.setTextColor(0, 0, 0);
+      this.doc.setFont('helvetica', 'normal');
+      categoryData.forEach(([category, count, total], index) => {
+        // Alternate row color
+        if (index % 2 === 0) {
+          this.doc.setFillColor(245, 245, 245);
+          this.doc.rect(this.margin, yPosition, this.contentWidth, tableRowHeight, 'F');
+        }
+
+        this.doc.setFontSize(9);
+        this.doc.text(category, this.margin + 2, yPosition + 5);
+        this.doc.text(count, this.margin + colWidths[0] + 2, yPosition + 5);
+        this.doc.text(total, this.margin + colWidths[0] + colWidths[1] + 2, yPosition + 5);
+        yPosition += tableRowHeight;
+      });
+
+      yPosition += 10;
+    }
+
+    return yPosition + 15; // Return Y position after summary
+  }
+
   private addExpensesTable(expenses: Expense[]): void {
     // Add new page for expenses table
     this.doc.addPage();
@@ -527,7 +661,10 @@ export class PDFGenerator {
 
   public generateExpenseReport(expenses: Expense[], fileName?: string): void {
     // Add header
-    this.addHeader('Laporan Biaya Operasional', 0, new Date().getFullYear());
+    const headerEndY = this.addHeader('Laporan Biaya Operasional', 0, new Date().getFullYear());
+
+    // Add expense summary
+    this.addExpenseSummary(expenses, headerEndY);
 
     // Add expenses table
     this.addExpensesTable(expenses);

@@ -1,4 +1,5 @@
-import { PDFReportData, Customer, Expense } from '@/lib/types';
+import { PDFReportData } from '@/utils/pdfGenerator';
+import { Customer, Expense } from '@/lib/types';
 
 // Dynamic import for PDF generation
 export const generatePDFReport = async (data: PDFReportData, fileName?: string): Promise<void> => {
@@ -8,8 +9,9 @@ export const generatePDFReport = async (data: PDFReportData, fileName?: string):
   // Transform data to match pdfGenerator interface
   const transformedData = {
     ...data,
-    wasaProfit: data.wasaRevenue || 0,
-    officeProfit: data.officeRevenue || 0,
+    // Include the new payment obligation data
+    officeToWasaPayment: data.officeToWasaPayment || 0,
+    wasaToOfficePayment: data.wasaToOfficePayment || 0,
   };
 
   generator.generateReport(transformedData, fileName);

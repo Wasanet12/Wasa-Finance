@@ -40,6 +40,8 @@ interface DashboardMetrics {
   unpaidCustomers: number;
   totalPaymentToWasa: number;
   totalPaymentToOffice: number;
+  officeToWasaPayment?: number;
+  wasaToOfficePayment?: number;
 }
 
 interface ComparisonMetrics {
@@ -51,6 +53,8 @@ interface ComparisonMetrics {
   customersChangePercent: number;
   profitChange: number;
   profitChangePercent: number;
+  officeToWasaPayment?: number;
+  wasaToOfficePayment?: number;
 }
 
 export default function DashboardPage() {
@@ -305,13 +309,20 @@ export default function DashboardPage() {
       .filter(customer => customer.status === 'active' && customer.paymentTarget === 'Kantor')
       .reduce((sum, customer) => sum + customer.packagePrice, 0);
 
+    // Calculate payment obligations between office and wasa
+    // Kantor harus bayar 40% dari total pembayaran pelanggan ke kantor ke wasa
+    const officeToWasaPayment = totalPaymentToOffice * 0.4;
+
+    // Wasa harus bayar 60% dari total pembayaran pelanggan ke wasa ke kantor
+    const wasaToOfficePayment = totalPaymentToWasa * 0.6;
+
     
     // Count all active customers (not 'inactive')
-    const totalActiveCustomers = customers.filter(customer => customer.status !== 'inactive').length;
+    const totalActiveCustomers = customers?.filter(customer => customer.status !== 'inactive').length || 0;
 
     // Count paid and unpaid customers
-    const paidCustomers = customers.filter(customer => customer.status === 'active').length;
-    const unpaidCustomers = customers.filter(customer => customer.status === 'inactive').length;
+    const paidCustomers = customers?.filter(customer => customer.status === 'active').length || 0;
+    const unpaidCustomers = customers?.filter(customer => customer.status === 'inactive').length || 0;
 
     const finalMetrics = {
       totalRevenue: totalRevenueBeforeDiscount, // Use gross revenue for display
@@ -330,6 +341,8 @@ export default function DashboardPage() {
       unpaidCustomers,
       totalPaymentToWasa,
       totalPaymentToOffice,
+      officeToWasaPayment,
+      wasaToOfficePayment,
     };
 
     calculateComparisonMetrics(finalMetrics);
@@ -411,6 +424,8 @@ export default function DashboardPage() {
         unpaidCustomers: metrics.unpaidCustomers,
         totalPaymentToWasa: metrics.totalPaymentToWasa,
         totalPaymentToOffice: metrics.totalPaymentToOffice,
+        officeToWasaPayment: metrics.officeToWasaPayment || 0,
+        wasaToOfficePayment: metrics.wasaToOfficePayment || 0,
       };
 
       await generatePDFReport(pdfData);
@@ -696,6 +711,9 @@ export default function DashboardPage() {
               <p className="text-xs mt-1 leading-snug truncate transition-all duration-300" style={{ color: '#FFFFFF' }}>
                 Total: {formatCurrency(metrics.totalPaymentToWasa)}
               </p>
+              <p className="text-xs mt-1 leading-snug truncate transition-all duration-300" style={{ color: '#FFFFFF' }}>
+                Wasa bayar ke Kantor: {formatCurrency(metrics.wasaToOfficePayment || 0)}
+              </p>
             </CardContent>
           </Card>
 
@@ -713,7 +731,10 @@ export default function DashboardPage() {
               <p className="text-xs mt-1 leading-snug truncate transition-all duration-300" style={{ color: '#FFFFFF' }}>
                 Total: {formatCurrency(metrics.totalPaymentToOffice)}
               </p>
-                                </CardContent>
+              <p className="text-xs mt-1 leading-snug truncate transition-all duration-300" style={{ color: '#FFFFFF' }}>
+                Kantor bayar ke Wasa: {formatCurrency(metrics.officeToWasaPayment || 0)}
+              </p>
+            </CardContent>
           </Card>
 
           <Card className="border-border shadow-lg transition-shadow" style={{ backgroundColor: '#1B2336' }}>
