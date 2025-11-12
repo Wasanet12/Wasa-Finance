@@ -247,46 +247,107 @@ export default function PaidCustomersPage() {
           <CardTitle style={{ color: '#FFFFFF' }}>Daftar Pelanggan Aktif</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="rounded-lg border table-container-rounded" style={{ borderColor: '#3D4558', borderRadius: '0.5rem', overflow: 'hidden' }}>
-            <Table>
-              <TableHeader className="table-header-white">
-                <TableRow className="table-row-hover">
-                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Nama</TableHead>
-                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Paket</TableHead>
-                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Harga</TableHead>
-                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Bayar ke</TableHead>
-                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Tanggal</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {customers.length === 0 ? (
-                  <TableRow className="table-row-hover">
-                    <TableCell colSpan={5} className="text-center py-8" style={{ color: '#FFFFFF' }}>
-                      Belum ada pelanggan yang sudah bayar.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  currentItems.map((customer) => (
-                    <TableRow key={customer.id} className="table-row-hover">
-                      <TableCell className="font-medium" style={{ color: '#FFFFFF' }}>{customer.name}</TableCell>
-                      <TableCell style={{ color: '#FFFFFF' }}>{customer.packageName}</TableCell>
-                      <TableCell className="font-semibold" style={{ color: '#FFFFFF' }}>
-                        {formatCurrency(customer.packagePrice - customer.discountAmount)}
-                      </TableCell>
-                      <TableCell>
+          {/* Mobile Card Layout */}
+          <div className="block lg:hidden">
+            {customers.length === 0 ? (
+              <div className="text-center py-8" style={{ color: '#FFFFFF' }}>
+                Belum ada pelanggan yang sudah bayar.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {currentItems.map((customer) => (
+                  <div
+                    key={customer.id}
+                    className="rounded-lg border p-4"
+                    style={{ borderColor: '#3D4558', backgroundColor: '#2D3548' }}
+                  >
+                    {/* Customer Header */}
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-base mb-1" style={{ color: '#FFFFFF' }}>
+                          {customer.name}
+                        </h3>
+                        <p className="text-sm" style={{ color: '#B8BFCC' }}>
+                          {customer.packageName}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Price and Payment Target */}
+                    <div className="grid grid-cols-2 gap-3 mb-3">
+                      <div>
+                        <p className="text-xs" style={{ color: '#B8BFCC' }}>Harga</p>
+                        <div className="font-semibold" style={{ color: '#FFFFFF' }}>
+                          {formatCurrency(customer.packagePrice - customer.discountAmount)}
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-xs" style={{ color: '#B8BFCC' }}>Bayar ke</p>
                         <Badge
                           style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}
-                          className="px-2 py-1 text-xs"
+                          className="px-2 py-1 text-xs mt-1 inline-block"
                         >
                           {customer.paymentTarget}
                         </Badge>
+                      </div>
+                    </div>
+
+                    {/* Date */}
+                    <div>
+                      <p className="text-xs" style={{ color: '#B8BFCC' }}>Tanggal</p>
+                      <p className="text-sm" style={{ color: '#FFFFFF' }}>
+                        {formatDate(customer.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Desktop Table Layout */}
+          <div className="hidden lg:block rounded-lg border table-container-rounded overflow-x-auto" style={{ borderColor: '#3D4558', borderRadius: '0.5rem' }}>
+            <div className="min-w-[800px]">
+              <Table>
+                <TableHeader className="table-header-white">
+                  <TableRow className="table-row-hover">
+                    <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Nama</TableHead>
+                    <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Paket</TableHead>
+                    <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Harga</TableHead>
+                    <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Bayar ke</TableHead>
+                    <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Tanggal</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {customers.length === 0 ? (
+                    <TableRow className="table-row-hover">
+                      <TableCell colSpan={5} className="text-center py-8" style={{ color: '#FFFFFF' }}>
+                        Belum ada pelanggan yang sudah bayar.
                       </TableCell>
-                      <TableCell style={{ color: '#FFFFFF' }}>{formatDate(customer.createdAt)}</TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ) : (
+                    currentItems.map((customer) => (
+                      <TableRow key={customer.id} className="table-row-hover">
+                        <TableCell className="font-medium" style={{ color: '#FFFFFF' }}>{customer.name}</TableCell>
+                        <TableCell style={{ color: '#FFFFFF' }}>{customer.packageName}</TableCell>
+                        <TableCell className="font-semibold" style={{ color: '#FFFFFF' }}>
+                          {formatCurrency(customer.packagePrice - customer.discountAmount)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}
+                            className="px-2 py-1 text-xs"
+                          >
+                            {customer.paymentTarget}
+                          </Badge>
+                        </TableCell>
+                        <TableCell style={{ color: '#FFFFFF' }}>{formatDate(customer.createdAt)}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </CardContent>
       </Card>

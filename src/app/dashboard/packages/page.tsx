@@ -234,77 +234,79 @@ export default function PackagesPage() {
           </div>
 
           {/* Desktop Table - Hidden on mobile */}
-          <div className="hidden md:block rounded-lg border table-container-rounded" style={{ borderColor: '#3D4558', borderRadius: '0.5rem', overflow: 'hidden' }}>
-            <Table>
-              <TableHeader className="table-header-white">
-                <TableRow className="table-row-hover">
-                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Nama Paket</TableHead>
-                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Harga</TableHead>
-                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Tanggal Dibuat</TableHead>
-                  <TableHead className="text-right" style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Aksi</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredPackages.length === 0 ? (
+          <div className="hidden md:block rounded-lg border table-container-rounded overflow-x-auto" style={{ borderColor: '#3D4558', borderRadius: '0.5rem' }}>
+            <div className="min-w-[700px]">
+              <Table>
+                <TableHeader className="table-header-white">
                   <TableRow className="table-row-hover">
-                    <TableCell colSpan={4} className="text-center py-8" style={{ color: '#FFFFFF' }}>
-                      {searchTerm
-                        ? 'Tidak ada paket yang cocok dengan pencarian.'
-                        : 'Belum ada data paket layanan.'}
-                    </TableCell>
+                    <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Nama Paket</TableHead>
+                    <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Harga</TableHead>
+                    <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Tanggal Dibuat</TableHead>
+                    <TableHead className="text-right" style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Aksi</TableHead>
                   </TableRow>
-                ) : (
-                  currentItems.map((pkg) => (
-                    <TableRow key={pkg.id} className="table-row-hover">
-                      <TableCell className="font-medium" style={{ color: '#FFFFFF' }}>{pkg.name}</TableCell>
-                      <TableCell className="font-semibold" style={{ color: '#FFFFFF' }}>
-                        {formatCurrency(pkg.price)}
-                      </TableCell>
-                      <TableCell style={{ color: '#FFFFFF' }}>{formatDate(pkg.createdAt)}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end space-x-2">
-                          <PackageForm
-                            pkg={pkg}
-                            onSuccess={fetchPackages}
-                            trigger={
-                              <Button variant="outline" size="sm" className="custom-btn">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            }
-                          />
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="outline" size="sm" className="custom-btn">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent style={{ backgroundColor: '#1B2336' }}>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle style={{ color: '#FFFFFF' }}>Hapus Paket</AlertDialogTitle>
-                                <AlertDialogDescription style={{ color: '#FFFFFF' }}>
-                                  Apakah Anda yakin ingin menghapus paket &quot;{pkg.name}&quot;?
-                                  Tindakan ini tidak dapat dibatalkan.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Batal</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDeletePackage(pkg.id!)}
-                                  className="custom-btn"
-                                  style={{ backgroundColor: '#EF4444' }}
-                                >
-                                  Hapus
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
+                </TableHeader>
+                <TableBody>
+                  {filteredPackages.length === 0 ? (
+                    <TableRow className="table-row-hover">
+                      <TableCell colSpan={4} className="text-center py-8" style={{ color: '#FFFFFF' }}>
+                        {searchTerm
+                          ? 'Tidak ada paket yang cocok dengan pencarian.'
+                          : 'Belum ada data paket layanan.'}
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ) : (
+                    currentItems.map((pkg) => (
+                      <TableRow key={pkg.id} className="table-row-hover">
+                        <TableCell className="font-medium" style={{ color: '#FFFFFF' }}>{pkg.name}</TableCell>
+                        <TableCell className="font-semibold" style={{ color: '#FFFFFF' }}>
+                          {formatCurrency(pkg.price)}
+                        </TableCell>
+                        <TableCell style={{ color: '#FFFFFF' }}>{formatDate(pkg.createdAt)}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end space-x-2">
+                            <PackageForm
+                              pkg={pkg}
+                              onSuccess={fetchPackages}
+                              trigger={
+                                <Button variant="outline" size="sm" className="custom-btn">
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              }
+                            />
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="sm" className="custom-btn">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent style={{ backgroundColor: '#1B2336' }}>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle style={{ color: '#FFFFFF' }}>Hapus Paket</AlertDialogTitle>
+                                  <AlertDialogDescription style={{ color: '#FFFFFF' }}>
+                                    Apakah Anda yakin ingin menghapus paket &quot;{pkg.name}&quot;?
+                                    Tindakan ini tidak dapat dibatalkan.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Batal</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDeletePackage(pkg.id!)}
+                                    className="custom-btn"
+                                    style={{ backgroundColor: '#EF4444' }}
+                                  >
+                                    Hapus
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </div>
 
           {/* Mobile Cards - Visible only on mobile */}

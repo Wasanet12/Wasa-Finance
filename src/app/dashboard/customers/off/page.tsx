@@ -227,7 +227,92 @@ export default function OffCustomersPage() {
           <CardTitle style={{ color: '#FFFFFF' }}>Daftar Pelanggan Off</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="rounded-lg border table-container-rounded" style={{ borderColor: '#3D4558', borderRadius: '0.5rem', overflow: 'hidden' }}>
+          {/* Mobile Card Layout */}
+          <div className="block lg:hidden">
+            {customers.length === 0 ? (
+              <div className="text-center py-8" style={{ color: '#FFFFFF' }}>
+                Tidak ada pelanggan dengan status Off.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {currentItems.map((customer) => (
+                  <div
+                    key={customer.id}
+                    className="rounded-lg border p-4"
+                    style={{ borderColor: '#3D4558', backgroundColor: '#2D3548' }}
+                  >
+                    {/* Customer Header */}
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-base mb-1" style={{ color: '#FFFFFF' }}>
+                          {customer.name}
+                        </h3>
+                        <p className="text-sm" style={{ color: '#B8BFCC' }}>
+                          {customer.packageName}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Price and Discount */}
+                    <div className="grid grid-cols-2 gap-3 mb-3">
+                      <div>
+                        <p className="text-xs" style={{ color: '#B8BFCC' }}>Harga Terakhir</p>
+                        <div className="font-semibold" style={{ color: '#FFFFFF' }}>
+                          {getPriceDisplay(customer)}
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-xs" style={{ color: '#B8BFCC' }}>Diskon</p>
+                        <div className="font-semibold" style={{ color: '#FFFFFF' }}>
+                          {getDiscountDisplay(customer)}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Payment Target and Date */}
+                    <div className="grid grid-cols-2 gap-3 mb-3">
+                      <div>
+                        <p className="text-xs" style={{ color: '#B8BFCC' }}>Tujuan Bayar</p>
+                        <Badge
+                          style={{ backgroundColor: "#FFFFFF", color: "#1B2336" }}
+                          className="px-2 py-1 text-xs mt-1 inline-block"
+                        >
+                          {customer.paymentTarget}
+                        </Badge>
+                      </div>
+                      <div>
+                        <p className="text-xs" style={{ color: '#B8BFCC' }}>Tanggal Off</p>
+                        <p className="text-sm" style={{ color: '#FFFFFF' }}>
+                          {formatDate(customer.updatedAt)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex justify-end">
+                      <ReactivateCustomerForm
+                        customer={customer}
+                        onSuccess={fetchOffCustomers}
+                        trigger={
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="custom-btn h-10 w-10 p-0"
+                            aria-label="Edit pelanggan"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        }
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Desktop Table Layout */}
+          <div className="hidden lg:block rounded-lg border table-container-rounded overflow-x-auto" style={{ borderColor: '#3D4558', borderRadius: '0.5rem' }}>
             <Table>
               <TableHeader className="table-header-white">
                 <TableRow className="table-row-hover">

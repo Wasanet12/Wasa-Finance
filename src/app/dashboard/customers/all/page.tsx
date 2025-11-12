@@ -489,99 +489,101 @@ export default function AllCustomersPage() {
 
           {/* Desktop Table Layout */}
           <div className="hidden lg:block rounded-lg border table-container-rounded overflow-x-auto" style={{ borderColor: '#3D4558', borderRadius: '0.5rem' }}>
-            <Table>
-              <TableHeader className="table-header-white">
-                <TableRow className="table-row-hover">
-                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Nama</TableHead>
-                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Paket</TableHead>
-                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Harga</TableHead>
-                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Diskon</TableHead>
-                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Status</TableHead>
-                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Bayar ke</TableHead>
-                  <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Tanggal</TableHead>
-                  <TableHead className="text-right" style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Aksi</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredCustomers.length === 0 ? (
+            <div className="min-w-[1000px]">
+              <Table>
+                <TableHeader className="table-header-white">
                   <TableRow className="table-row-hover">
-                    <TableCell colSpan={8} className="text-center py-8" style={{ color: '#FFFFFF' }}>
-                      {searchTerm
-                        ? 'Tidak ada pelanggan yang cocok dengan pencarian.'
-                        : 'Belum ada data pelanggan.'}
-                    </TableCell>
+                    <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Nama</TableHead>
+                    <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Paket</TableHead>
+                    <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Harga</TableHead>
+                    <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Diskon</TableHead>
+                    <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Status</TableHead>
+                    <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Bayar ke</TableHead>
+                    <TableHead style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Tanggal</TableHead>
+                    <TableHead className="text-right" style={{ backgroundColor: '#FFFFFF', color: '#1B2336' }}>Aksi</TableHead>
                   </TableRow>
-                ) : (
-                  currentItems.map((customer) => (
-                    <TableRow key={customer.id} className="table-row-hover">
-                      <TableCell className="font-medium" style={{ color: '#FFFFFF' }}>{customer.name}</TableCell>
-                      <TableCell style={{ color: '#FFFFFF' }}>{customer.packageName}</TableCell>
-                      <TableCell style={{ color: '#FFFFFF' }}>{getPriceDisplay(customer)}</TableCell>
-                      <TableCell style={{ color: '#FFFFFF' }}>{getDiscountDisplay(customer)}</TableCell>
-                      <TableCell>{getStatusBadge(customer.status)}</TableCell>
-                      <TableCell>{getPaymentTargetBadge(customer.paymentTarget)}</TableCell>
-                      <TableCell style={{ color: '#FFFFFF' }}>{formatDate(customer.createdAt)}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end space-x-2">
-                          {canMarkAsUnpaid(customer) && (
-                            <MarkUnpaidForm
+                </TableHeader>
+                <TableBody>
+                  {filteredCustomers.length === 0 ? (
+                    <TableRow className="table-row-hover">
+                      <TableCell colSpan={8} className="text-center py-8" style={{ color: '#FFFFFF' }}>
+                        {searchTerm
+                          ? 'Tidak ada pelanggan yang cocok dengan pencarian.'
+                          : 'Belum ada data pelanggan.'}
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    currentItems.map((customer) => (
+                      <TableRow key={customer.id} className="table-row-hover">
+                        <TableCell className="font-medium" style={{ color: '#FFFFFF' }}>{customer.name}</TableCell>
+                        <TableCell style={{ color: '#FFFFFF' }}>{customer.packageName}</TableCell>
+                        <TableCell style={{ color: '#FFFFFF' }}>{getPriceDisplay(customer)}</TableCell>
+                        <TableCell style={{ color: '#FFFFFF' }}>{getDiscountDisplay(customer)}</TableCell>
+                        <TableCell>{getStatusBadge(customer.status)}</TableCell>
+                        <TableCell>{getPaymentTargetBadge(customer.paymentTarget)}</TableCell>
+                        <TableCell style={{ color: '#FFFFFF' }}>{formatDate(customer.createdAt)}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end space-x-2">
+                            {canMarkAsUnpaid(customer) && (
+                              <MarkUnpaidForm
+                                customer={customer}
+                                onSuccess={fetchCustomers}
+                                trigger={
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="custom-btn h-11 min-w-[44px] px-3"
+                                    title="Tandai sebagai Belum Bayar"
+                                    style={{ backgroundColor: '#F59E0B', borderColor: '#F59E0B', color: '#FFFFFF' }}
+                                  >
+                                    <AlertCircle className="h-4 w-4" />
+                                  </Button>
+                                }
+                              />
+                            )}
+                            <CustomerForm
                               customer={customer}
                               onSuccess={fetchCustomers}
                               trigger={
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="custom-btn h-11 min-w-[44px] px-3"
-                                  title="Tandai sebagai Belum Bayar"
-                                  style={{ backgroundColor: '#F59E0B', borderColor: '#F59E0B', color: '#FFFFFF' }}
-                                >
-                                  <AlertCircle className="h-4 w-4" />
+                                <Button variant="outline" size="sm" className="custom-btn h-11 min-w-[44px] px-3">
+                                  <Edit className="h-4 w-4" />
                                 </Button>
                               }
                             />
-                          )}
-                          <CustomerForm
-                            customer={customer}
-                            onSuccess={fetchCustomers}
-                            trigger={
-                              <Button variant="outline" size="sm" className="custom-btn h-11 min-w-[44px] px-3">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            }
-                          />
-                            <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="outline" size="sm" className="custom-btn h-11 min-w-[44px] px-3">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Hapus Pelanggan</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Apakah Anda yakin ingin menghapus pelanggan &quot;{customer.name}&quot;?
-                                  Tindakan ini tidak dapat dibatalkan.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Batal</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDeleteCustomer(customer.id!)}
-                                  className="custom-btn"
-                                  style={{ backgroundColor: '#EF4444' }}
-                                >
-                                  Hapus
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                              <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="sm" className="custom-btn h-11 min-w-[44px] px-3">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Hapus Pelanggan</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Apakah Anda yakin ingin menghapus pelanggan &quot;{customer.name}&quot;?
+                                    Tindakan ini tidak dapat dibatalkan.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Batal</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDeleteCustomer(customer.id!)}
+                                    className="custom-btn"
+                                    style={{ backgroundColor: '#EF4444' }}
+                                  >
+                                    Hapus
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </CardContent>
       </Card>
