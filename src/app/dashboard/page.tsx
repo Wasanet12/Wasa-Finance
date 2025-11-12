@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCustomers, useExpenses } from '@/hooks/useFirestoreCache';
-import { DashboardMetricSkeleton, TableSkeleton } from '@/components/ui/skeleton';
+import { DashboardMetricSkeleton, TableSkeleton, CardSkeleton } from '@/components/ui/skeleton';
 import { Customer, Expense } from '@/lib/types';
 import { generatePDFReport } from '@/utils/pdfLoader';
 import { toDate } from '@/utils/dateUtils';
@@ -239,38 +239,11 @@ export default function DashboardPage() {
     }
   };
 
-  const getFilteredData = () => {
-    // Filter customers for selected month and year
-    const filteredCustomers = customers.filter(customer => {
-      if (!customer.createdAt) return false;
-
-      const customerDate = toDate(customer.createdAt);
-      if (!customerDate) return false;
-      const matches = customerDate.getMonth() === (selectedMonth - 1) &&
-             customerDate.getFullYear() === selectedYear;
-      return matches;
-    });
-
-    // Filter expenses for selected month and year
-    const filteredExpenses = expenses.filter(expense => {
-      const expenseDate = toDate(expense.date);
-      if (!expenseDate) return false;
-      const matches = expenseDate.getMonth() === (selectedMonth - 1) &&
-             expenseDate.getFullYear() === selectedYear;
-      return matches;
-    });
-
-    return { filteredCustomers, filteredExpenses };
-  };
-
+  
   const calculateMetrics = () => {
-
-    // Get filtered data
-    const { filteredCustomers, filteredExpenses } = getFilteredData();
-
     // If no data, return zeros
-    if (!customers.length && !expenses.length) {
-      setMetrics({
+    if (!filteredCustomers.length && !filteredExpenses.length) {
+      return {
         totalRevenue: 0,
         totalRevenueBeforeDiscount: 0,
         wasaProfit: 0,
@@ -282,13 +255,16 @@ export default function DashboardPage() {
         totalDiscount: 0,
         customersPayToWasa: 0,
         customersPayToOffice: 0,
-        totalActiveCustomers: 0,
-        paidCustomers: 0,
-        unpaidCustomers: 0,
         totalPaymentToWasa: 0,
         totalPaymentToOffice: 0,
-      });
-      return;
+        customerCounts: {
+          total: 0,
+          active: 0,
+          inactive: 0,
+          paid: 0,
+          unpaid: 0
+        }
+      };
     }
 
     console.log('Filtered customers count:', filteredCustomers.length);
@@ -426,7 +402,7 @@ export default function DashboardPage() {
   };
 
   const getTopCustomers = () => {
-    const { filteredCustomers } = getFilteredData();
+    if (!filteredCustomers.length) return [];
     return filteredCustomers
       .filter(customer => customer.status === 'active')
       .sort((a, b) => (b.packagePrice - (b.discountAmount || 0)) - (a.packagePrice - (a.discountAmount || 0)))
@@ -434,7 +410,7 @@ export default function DashboardPage() {
   };
 
   const getTopExpenses = () => {
-    const { filteredExpenses } = getFilteredData();
+    if (!filteredExpenses.length) return [];
     return filteredExpenses
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 5);
@@ -442,8 +418,7 @@ export default function DashboardPage() {
 
   const handleDownloadPDF = async () => {
     try {
-      // Get filtered data
-      const { filteredCustomers, filteredExpenses } = getFilteredData();
+      // Use already filtered data
 
       // Prepare data for PDF with correct field mapping
       const pdfData = {
@@ -475,6 +450,36 @@ export default function DashboardPage() {
       alert('Gagal menghasilkan PDF. Silakan coba lagi.');
     }
   };
+
+  // Show loading state while fetching data
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <DashboardMetricSkeleton key={i} />
+          ))}
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <CardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (hasError) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-500">Error loading data. Please try again.</p>
+        <Button onClick={() => window.location.reload()} className="mt-4">
+          Retry
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 sm:space-y-6 lg:space-y-8 min-h-screen" style={{ backgroundColor: '#FFFFFF' }}>
