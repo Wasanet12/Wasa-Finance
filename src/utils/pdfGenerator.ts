@@ -346,83 +346,6 @@ export class PDFGenerator {
     return yPosition + 15; // Return Y position after summary
   }
 
-  private addCustomersTableWithSummary(customers: Customer[], startY: number): void {
-    // Check if we need a new page
-    if (startY > this.pageHeight - 60) {
-      this.doc.addPage();
-      startY = this.margin + 20;
-    }
-
-    // Add section header
-    this.doc.setFillColor(27, 35, 54);
-    this.doc.rect(this.margin, startY, this.contentWidth, 15, 'F');
-
-    this.doc.setFontSize(14);
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.setTextColor(255, 255, 255);
-    this.doc.text('Daftar Pelanggan', this.pageWidth / 2, startY + 10, { align: 'center' });
-
-    // Prepare table data for active customers
-    const tableData = customers.map(customer => [
-      customer.name,
-      customer.packageName,
-      this.formatCurrency(customer.packagePrice),
-      customer.discountAmount ? this.formatCurrency(customer.discountAmount) : 'Rp 0',
-      this.formatCurrency(customer.discountAmount ? customer.packagePrice - customer.discountAmount : customer.packagePrice),
-      customer.status,
-      customer.paymentTarget || 'Wasa',
-      this.formatDate(customer.createdAt)
-    ]);
-
-    // Add table with minimal styling
-    autoTable(this.doc, {
-      head: [['Nama', 'Paket', 'Harga', 'Diskon', 'Harga Final', 'Status', 'Bayar ke', 'Tanggal']],
-      body: tableData,
-      startY: startY + 25,
-      margin: { left: this.margin, right: this.margin, top: this.margin, bottom: this.margin },
-      pageBreak: 'auto',
-      styles: {
-        font: 'helvetica',
-        fontSize: 9,
-        cellPadding: 4,
-        lineColor: [27, 35, 54],
-        lineWidth: 0.1,
-        fillColor: [255, 255, 255],
-      },
-      headStyles: {
-        fillColor: [27, 35, 54],
-        textColor: 255,
-        fontStyle: 'bold',
-        fontSize: 10,
-        cellPadding: 5,
-      },
-      alternateRowStyles: {
-        fillColor: [248, 248, 248],
-      },
-      columnStyles: {
-        0: { cellWidth: 'auto' }, // Nama
-        1: { cellWidth: 'auto' }, // Paket
-        2: { cellWidth: 'auto', halign: 'right' }, // Harga
-        3: { cellWidth: 'auto', halign: 'right' }, // Diskon
-        4: { cellWidth: 'auto', halign: 'right', fontStyle: 'bold' }, // Harga Final
-        5: { cellWidth: 'auto' }, // Status
-        6: { cellWidth: 'auto' }, // Bayar ke
-        7: { cellWidth: 'auto' }, // Tanggal
-      },
-      didDrawPage: (data) => {
-        // Add footer on each page
-        this.doc.setFontSize(8);
-        this.doc.setTextColor(27, 35, 54);
-        this.doc.text(
-          `Halaman ${data.pageNumber} - Dicetak: ${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}`,
-          this.pageWidth / 2,
-          this.pageHeight - 10,
-          { align: 'center' }
-        );
-      }
-    });
-  }
-
   private addCustomersTable(customers: Customer[]): void {
     // Add new page for customers table
     this.doc.addPage();
@@ -596,7 +519,7 @@ export class PDFGenerator {
     const summaryEndY = this.addCustomerSummary(customers, headerEndY);
 
     // Add customers table
-    this.addCustomersTableWithSummary(customers, summaryEndY);
+    this.addCustomersTable(customers);
 
     // Save the PDF
     this.doc.save(fileName || `Daftar-Pelanggan-${new Date().toISOString().split('T')[0]}.pdf`);
