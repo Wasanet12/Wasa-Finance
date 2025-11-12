@@ -9,14 +9,21 @@ export interface PDFReportData {
   selectedMonth: number;
   selectedYear: number;
   totalRevenue: number;
+  totalRevenueBeforeDiscount: number;
   wasaProfit: number;
+  wasaProfitBeforeDiscount: number;
   officeProfit: number;
   totalExpenses: number;
   wasaNetProfit: number;
-  totalPaymentToWasa: number;
-  totalPaymentToOffice: number;
+  wasaNetProfitBeforeDiscount: number;
+  totalDiscount: number;
+  totalActiveCustomers: number;
+  paidCustomers: number;
+  unpaidCustomers: number;
   customersPayToWasa: number;
   customersPayToOffice: number;
+  totalPaymentToWasa: number;
+  totalPaymentToOffice: number;
 }
 
 export class PDFGenerator {
@@ -108,10 +115,13 @@ export class PDFGenerator {
       ['Laba Kantor (60%)', this.formatCurrency(data.officeProfit)],
       ['Total Biaya Operasional', this.formatCurrency(data.totalExpenses)],
       ['Keuntungan Bersih Wasa', this.formatCurrency(data.wasaNetProfit)],
+      ['Total Diskon', this.formatCurrency(data.totalDiscount || 0)],
+      ['Total Pelanggan', `${data.totalActiveCustomers} pelanggan`],
+      ['Pelanggan Aktif', `${data.paidCustomers} pelanggan`],
+      ['Pelanggan Non-Aktif', `${data.unpaidCustomers} pelanggan`],
     ];
 
     // Create financial summary table
-    const tableColumnWidth = [this.contentWidth * 0.7, this.contentWidth * 0.3];
     const tableRowHeight = 8;
 
     // Header row
@@ -204,8 +214,8 @@ export class PDFGenerator {
       customer.name,
       customer.packageName,
       this.formatCurrency(customer.packagePrice),
-      customer.discount ? this.formatCurrency(customer.discount) : 'Rp 0',
-      this.formatCurrency(customer.discount ? customer.packagePrice - customer.discount : customer.packagePrice),
+      customer.discountAmount ? this.formatCurrency(customer.discountAmount) : 'Rp 0',
+      this.formatCurrency(customer.discountAmount ? customer.packagePrice - customer.discountAmount : customer.packagePrice),
       customer.status,
       customer.paymentTarget || 'Wasa',
       this.formatDate(customer.createdAt)
@@ -328,8 +338,8 @@ export class PDFGenerator {
     // Add header and get Y position
     const headerEndY = this.addHeader('Laporan Keuangan Wasa Finance', data.selectedMonth, data.selectedYear);
 
-    // Add summary metrics and get Y position
-    const summaryEndY = this.addSummaryMetrics(data, headerEndY);
+    // Add summary metrics
+    this.addSummaryMetrics(data, headerEndY);
 
     // Add customers table if there are customers
     if (data.customers.length > 0) {
@@ -351,7 +361,7 @@ export class PDFGenerator {
 
   public generateCustomerReport(customers: Customer[], title: string, fileName?: string): void {
     // Add header
-    const headerEndY = this.addHeader(title, 0, new Date().getFullYear());
+    this.addHeader(title, 0, new Date().getFullYear());
 
     // Add customers table
     this.addCustomersTable(customers);
@@ -362,7 +372,7 @@ export class PDFGenerator {
 
   public generateExpenseReport(expenses: Expense[], fileName?: string): void {
     // Add header
-    const headerEndY = this.addHeader('Laporan Biaya Operasional', 0, new Date().getFullYear());
+    this.addHeader('Laporan Biaya Operasional', 0, new Date().getFullYear());
 
     // Add expenses table
     this.addExpensesTable(expenses);

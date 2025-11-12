@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { services } from '@/lib/firestore';
 import { Customer } from '@/lib/types';
+import { generateCustomerPDFReport } from '@/utils/pdfLoader';
 import { UserCheck, DollarSign, Building2, CreditCard, Building, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatDate, formatCurrency, toDate } from '@/utils/dateUtils';
 import {
@@ -105,19 +106,13 @@ export default function PaidCustomersPage() {
     );
   }
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     try {
-      // Create a temporary array with the customers for PDF generation
-      const pdfData = {
-        customers: customers,
-        title: 'Daftar Pelanggan Aktif'
-      };
-
-      // You can implement PDF generation here if needed
-      console.log('PDF data prepared:', pdfData);
-      alert(`PDF akan menampilkan ${customers.length} pelanggan aktif`);
+      await generateCustomerPDFReport(customers, 'Daftar Pelanggan Aktif', `Pelanggan-Aktif-${new Date().toISOString().split('T')[0]}.pdf`);
+      console.log('Customer PDF report generated successfully');
     } catch (error) {
-      console.error('Error preparing PDF:', error);
+      console.error('Error generating customer PDF report:', error);
+      alert('Gagal menghasilkan PDF. Silakan coba lagi.');
     }
   };
 

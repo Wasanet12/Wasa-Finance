@@ -219,7 +219,7 @@ export default function DashboardPage() {
       } else {
         setExpenses([]);
       }
-    } catch (error) {
+    } catch {
       setCustomers([]);
       setExpenses([]);
     }
@@ -325,10 +325,8 @@ export default function DashboardPage() {
     const officeProfitAfterDiscount = officeProfitBeforeDiscount - officeTotalDiscount; // Office profit setelah dikurangi diskon
 
     // For compatibility, update the profit values
-    const officeProfit = officeProfitAfterDiscount; // Use after-discount profit for display
+    // const officeProfit = officeProfitAfterDiscount; // Use after-discount profit for display
 
-    
-    
     // Count customers by payment target (handle missing paymentTarget field)
     const customersPayToWasaCount = filteredCustomers.filter(
       customer => customer.status === 'active' && (customer.paymentTarget === 'Wasa' || !customer.paymentTarget)
@@ -429,24 +427,38 @@ export default function DashboardPage() {
   };
 
   const handleDownloadPDF = async () => {
-    // Get filtered data
-    const { filteredCustomers, filteredExpenses } = getFilteredData();
-
-    // Prepare data for PDF
-    const pdfData = {
-      customers: filteredCustomers,
-      expenses: filteredExpenses,
-      selectedMonth,
-      selectedYear,
-      wasaRevenue: metrics.customersPayToWasa,
-      officeRevenue: metrics.customersPayToOffice,
-      ...metrics,
-    };
-
     try {
+      // Get filtered data
+      const { filteredCustomers, filteredExpenses } = getFilteredData();
+
+      // Prepare data for PDF with correct field mapping
+      const pdfData = {
+        customers: filteredCustomers,
+        expenses: filteredExpenses,
+        selectedMonth,
+        selectedYear,
+        totalRevenue: metrics.totalRevenue,
+        totalRevenueBeforeDiscount: metrics.totalRevenueBeforeDiscount,
+        wasaProfit: metrics.wasaProfit,
+        wasaProfitBeforeDiscount: metrics.wasaProfitBeforeDiscount,
+        officeProfit: metrics.officeProfit,
+        totalExpenses: metrics.totalExpenses,
+        wasaNetProfit: metrics.wasaNetProfit,
+        wasaNetProfitBeforeDiscount: metrics.wasaNetProfitBeforeDiscount,
+        totalDiscount: metrics.totalDiscount,
+        customersPayToWasa: metrics.customersPayToWasa,
+        customersPayToOffice: metrics.customersPayToOffice,
+        totalActiveCustomers: metrics.totalActiveCustomers,
+        paidCustomers: metrics.paidCustomers,
+        unpaidCustomers: metrics.unpaidCustomers,
+        totalPaymentToWasa: metrics.totalPaymentToWasa,
+        totalPaymentToOffice: metrics.totalPaymentToOffice,
+      };
+
       await generatePDFReport(pdfData);
     } catch (error) {
-      // Handle PDF generation error
+      console.error('Error generating PDF report:', error);
+      alert('Gagal menghasilkan PDF. Silakan coba lagi.');
     }
   };
 

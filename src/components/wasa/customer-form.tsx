@@ -42,7 +42,7 @@ const customerSchema = z.object({
   paymentTarget: z.enum(['Wasa', 'Kantor']),
 });
 
-type CustomerFormData = z.infer<typeof customerSchema>;
+type CustomerFormSchema = z.infer<typeof customerSchema>;
 
 interface CustomerFormProps {
   customer?: Customer;
@@ -55,7 +55,7 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
   const [loading, setLoading] = useState(false);
   const [packages, setPackages] = useState<Package[]>([]);
 
-  const form = useForm<CustomerFormData>({
+  const form = useForm<CustomerFormSchema>({
     resolver: zodResolver(customerSchema),
     defaultValues: {
       name: customer?.name || '',
@@ -86,7 +86,7 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
     }
   };
 
-  const onSubmit = async (data: CustomerFormData) => {
+  const onSubmit = async (data: CustomerFormSchema) => {
     setLoading(true);
     try {
       // Find selected package to get package ID
@@ -98,7 +98,7 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
       // Calculate final price based on discount
       const finalPrice = data.packagePrice - data.discountAmount;
 
-      const customerData = {
+      const customerData: Omit<Customer, 'id'> = {
         name: data.name,
         packageId: selectedPackage.id,
         packageName: data.packageName,
@@ -117,7 +117,7 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
 
       // Only include finalPrice if there's a discount
       if (data.discountAmount > 0) {
-        (customerData as any).finalPrice = finalPrice;
+        customerData.finalPrice = finalPrice;
       }
 
       if (customer?.id) {
@@ -189,7 +189,7 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
                   <FormControl>
                     <Input
                       placeholder="Nama pelanggan"
-                      value={field.value === 0 ? '' : field.value}
+                      value={field.value || ''}
                       onChange={field.onChange}
                       className="h-9 sm:h-10 text-xs sm:text-sm"
                       style={{
@@ -245,7 +245,7 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
                   <FormControl>
                     <Input
                       type="number"
-                      value={field.value === 0 ? '' : field.value}
+                      value={field.value || ''}
                       onChange={(e) => {
                         const value = e.target.value;
                         if (value === '') {
@@ -278,7 +278,7 @@ export function CustomerForm({ customer, onSuccess, trigger }: CustomerFormProps
                     <Input
                       type="number"
                       min="0"
-                      value={field.value === 0 ? '' : field.value}
+                      value={field.value || ''}
                       onChange={(e) => {
                         const value = e.target.value;
                         if (value === '') {

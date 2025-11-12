@@ -7,7 +7,6 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -84,12 +83,12 @@ export function MarkUnpaidForm({ customer, onSuccess, trigger }: MarkUnpaidFormP
           </AlertDialogTitle>
         </AlertDialogHeader>
         <div className="text-muted-foreground text-sm">
-          Apakah Anda yakin ingin menandai pelanggan <strong>{customer.name}</strong> sebagai "Belum Bayar"?
+          Apakah Anda yakin ingin menandai pelanggan <strong>{customer.name}</strong> sebagai &quot;Belum Bayar&quot;?
           <br /><br />
           Tindakan ini akan:
           <ul className="list-disc list-inside mt-2 space-y-1">
-            <li>Mengubah status pelanggan menjadi "Belum Bayar"</li>
-            <li>Menampilkan pelanggan di halaman "Pelanggan Belum Bayar"</li>
+            <li>Mengubah status pelanggan menjadi &quot;Belum Bayar&quot;</li>
+            <li>Menampilkan pelanggan di halaman &quot;Pelanggan Belum Bayar&quot;</li>
             <li>Memberikan kesempatan untuk memberikan diskon</li>
           </ul>
         </div>

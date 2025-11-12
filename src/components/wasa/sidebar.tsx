@@ -73,6 +73,7 @@ export function Sidebar({ className }: SidebarProps) {
         <div className="px-4 sm:px-6 mb-6 sm:mb-8">
           <div className="flex items-center space-x-3">
             <div className="relative flex-shrink-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/WASAA.jpg"
                 alt="Wasa Finance Logo"

@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useMonthYear } from '@/contexts/MonthYearContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -134,7 +133,7 @@ export default function ExpensesPage() {
         ? `-${new Date(selectedYear, selectedMonth - 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}`
         : '';
       await generateExpensePDFReport(filteredExpenses, `Laporan-Biaya${monthYearText}.pdf`);
-    } catch (error) {
+    } catch {
       // Handle PDF generation error
     }
   };

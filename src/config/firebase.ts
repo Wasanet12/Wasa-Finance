@@ -50,8 +50,8 @@ export const collections = {
   settings: 'settings'
 } as const;
 
-// Export default configuration
-export default {
+// Export configuration object
+const firebaseConfig = {
   app,
   auth,
   db,
@@ -59,3 +59,5 @@ export default {
   config,
   collections
 };
+
+export default firebaseConfig;

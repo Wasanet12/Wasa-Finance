@@ -16,10 +16,7 @@ import {
   orderBy,
   limit,
   Timestamp,
-  runTransaction,
-  arrayUnion,
-  arrayRemove
-} from 'firebase/firestore';
+  } from 'firebase/firestore';
 
 import { db } from '@/lib/firebase';
 import type {
@@ -298,7 +295,7 @@ export const customerService = {
       }
 
       return allCustomers;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching customers by month:', error);
       return {
         success: false,
@@ -439,7 +436,7 @@ export const expenseService = {
       const endDate = dateToTimestamp(new Date(year, month, 0, 23, 59, 59)); // Last day of month
 
       return getExpensesByDateRange(startDate, endDate);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching expenses by month:', error);
       return {
         success: false,
@@ -530,7 +527,7 @@ export const paymentService = {
       }
 
       return allPayments;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching payments by month:', error);
       return {
         success: false,
@@ -626,7 +623,7 @@ export const settingsService = {
   /**
    * Update setting by key
    */
-  updateByKey: async (key: string, value: any): Promise<ApiResponse<void>> => {
+  updateByKey: async (key: string, value: unknown): Promise<ApiResponse<void>> => {
     const existing = await settingsService.getByKey(key);
     if (existing.success && existing.data) {
       return updateDocument(COLLECTIONS.SETTINGS, existing.data.id, { value });

@@ -20,6 +20,7 @@ export interface Customer {
   discountAmount: number;
   discountPercentage?: number;
   discount?: number; // Total discount percentage for reporting
+  finalPrice?: number;
 
   // Payment Information
   status: 'active' | 'inactive' | 'Belum Bayar' | 'pending';
@@ -173,7 +174,7 @@ export interface Report {
 export interface Settings {
   id: string;
   key: string;
-  value: any;
+  value: unknown;
   type: 'string' | 'number' | 'boolean' | 'object';
   description?: string;
 
@@ -248,7 +249,7 @@ export interface QueryOptions {
   where?: {
     field: string;
     operator: '==' | '!=' | '>' | '>=' | '<' | '<=' | 'in' | 'array-contains';
-    value: any;
+    value: unknown;
   }[];
 }
 
@@ -264,6 +265,7 @@ export interface CustomerFormData {
   packagePrice: number;
   originalPrice: number;
   discountAmount: number;
+  finalPrice?: number;
   status: 'active' | 'inactive' | 'Belum Bayar' | 'pending';
   paymentTarget: 'Wasa' | 'Kantor';
   paymentMethod?: 'cash' | 'transfer' | 'e-wallet' | 'credit_card';
@@ -304,10 +306,14 @@ export interface PDFReportData {
   selectedMonth: number;
   selectedYear: number;
   totalRevenue: number;
-  wasaRevenue: number;
-  officeRevenue: number;
+  totalRevenueBeforeDiscount: number;
+  wasaProfit: number;
+  wasaProfitBeforeDiscount: number;
+  officeProfit: number;
   totalExpenses: number;
   wasaNetProfit: number;
+  wasaNetProfitBeforeDiscount: number;
+  totalDiscount: number;
   totalActiveCustomers: number;
   paidCustomers: number;
   unpaidCustomers: number;

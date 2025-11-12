@@ -22,7 +22,7 @@ export function PWAInstallPrompt() {
     // Check if app is already installed
     const checkInstalled = () => {
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-      const isInWebAppiOS = (window.navigator as any).standalone === true;
+      const isInWebAppiOS = (window.navigator as { standalone?: boolean }).standalone === true;
       setIsInstalled(isStandalone || isInWebAppiOS);
     };
 

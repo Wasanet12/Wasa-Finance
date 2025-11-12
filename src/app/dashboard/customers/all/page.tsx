@@ -68,7 +68,7 @@ export default function AllCustomersPage() {
   }, [filteredCustomers]);
 
   useEffect(() => {
-    let filtered = customers.filter(customer =>
+    const filtered = customers.filter(customer =>
       customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       customer.packageName.toLowerCase().includes(searchTerm.toLowerCase())
     );

@@ -31,7 +31,7 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [auth, setAuth] = useState<any>(null);
+  const [auth, setAuth] = useState<Auth | null>(null);
 
   useEffect(() => {
     try {
@@ -78,13 +78,13 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
     try {
       setError(null);
 
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, email, password);
 
       // User state will be updated by onAuthStateChanged listener
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('❌ SimpleAuthProvider login error:', error);
-      const errorMessage = error?.message || 'Login failed';
+      const errorMessage = error instanceof Error ? error.message : 'Login failed';
       setError(errorMessage);
       return { success: false, error: errorMessage };
     }
@@ -95,7 +95,7 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
 
     try {
       await signOut(auth);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('❌ Logout error:', error);
       setError('Error during logout');
     }

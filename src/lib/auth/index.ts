@@ -4,7 +4,6 @@
  */
 
 import {
-  getAuth,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
@@ -14,6 +13,17 @@ import {
   onAuthStateChanged as firebaseOnAuthStateChanged,
   User as FirebaseUser
 } from 'firebase/auth';
+
+// Define Firebase error interface
+interface FirebaseError extends Error {
+  code: string;
+  customData?: Record<string, unknown>;
+}
+
+// Type guard function to check if error is a FirebaseError
+function isFirebaseError(error: unknown): error is FirebaseError {
+  return error instanceof Error && 'code' in error;
+}
 import { auth } from '@/lib/firebase';
 import type { User, AuthState } from '@/lib/types';
 
@@ -38,7 +48,11 @@ const updateAuthState = (newState: AuthState) => {
 /**
  * Get error message from Firebase error
  */
-const getErrorMessage = (error: any): string => {
+const getErrorMessage = (error: unknown): string => {
+  if (!isFirebaseError(error)) {
+    return 'An unexpected error occurred. Please try again.';
+  }
+
   const errorCode = error?.code;
 
   switch (errorCode) {
@@ -126,7 +140,7 @@ const signIn = async (email: string, password: string): Promise<AuthState> => {
     });
 
     return getAuthState();
-  } catch (error: any) {
+  } catch (error: unknown) {
     const authState: AuthState = {
       user: null,
       loading: false,
@@ -159,7 +173,7 @@ const signUp = async (email: string, password: string, displayName?: string): Pr
     });
 
     return getAuthState();
-  } catch (error: any) {
+  } catch (error: unknown) {
     const authState: AuthState = {
       user: null,
       loading: false,
@@ -182,7 +196,7 @@ const signOutUser = async (): Promise<void> => {
       loading: false,
       error: null
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Sign out error:', error);
   }
 };
@@ -193,7 +207,7 @@ const signOutUser = async (): Promise<void> => {
 const resetPassword = async (email: string): Promise<void> => {
   try {
     await sendPasswordResetEmail(auth, email);
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(getErrorMessage(error));
   }
 };
@@ -209,7 +223,7 @@ const updateUserPassword = async (newPassword: string): Promise<void> => {
     }
 
     await updatePassword(currentUser, newPassword);
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(getErrorMessage(error));
   }
 };
@@ -237,7 +251,7 @@ const updateUserProfile = async (updates: {
         user: updatedUser
       });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(getErrorMessage(error));
   }
 };
@@ -298,6 +312,25 @@ const mapFirebaseUserToUser = async (firebaseUser: FirebaseUser): Promise<User> 
 };
 
 // ==================== EXPORTS ====================
+
+// Create auth service object with all functions
+const authService = {
+  login: signIn,
+  register: signUp,
+  logout: signOutUser,
+  forgotPassword: resetPassword,
+  updateUserPassword,
+  updateUserProfile,
+  getAuthState,
+  getCurrentUser,
+  isAuthenticated,
+  isAdmin,
+  canEdit,
+  onAuthStateChanged
+};
+
+// Export default auth service
+export default authService;
 
 export {
   signIn as login,
