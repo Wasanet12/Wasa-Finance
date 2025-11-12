@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSimpleAuth } from '@/components/simple-auth-provider';
 import { Sidebar } from '@/components/wasa/sidebar';
 import { MonthYearProvider } from '@/contexts/MonthYearContext';
+import { PageTransition, LoadingSpinner } from '@/components/ui/skeleton';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -16,14 +17,19 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  const { user, loading: authLoading } = useSimpleAuth();
+  const { user, loading: authLoading, isAuthenticated } = useSimpleAuth();
+
+  // Memoize auth check to prevent unnecessary re-renders
+  const shouldRedirect = useMemo(() => {
+    return !authLoading && !isAuthenticated;
+  }, [authLoading, isAuthenticated]);
 
   // Redirect if not authenticated
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (shouldRedirect) {
       router.push('/login');
     }
-  }, [user, authLoading, router]);
+  }, [shouldRedirect, router]);
 
   // Close sidebar when route changes (mobile and tablet)
   useEffect(() => {
@@ -31,15 +37,20 @@ export default function DashboardLayout({
     setSidebarOpen(false);
   }, [pathname]);
 
+  // Optimized loading state with better UX
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#FFFFFF' }}>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto mb-4" style={{ borderColor: '#1B2336' }}></div>
-          <p style={{ color: '#1B2336' }}>Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center space-y-4">
+          <LoadingSpinner size="lg" />
+          <p className="text-gray-600 animate-pulse">Memuat aplikasi...</p>
         </div>
       </div>
     );
+  }
+
+  if (!isAuthenticated) {
+    return null; // Will redirect via useEffect
   }
 
   if (!user) {
@@ -101,7 +112,9 @@ export default function DashboardLayout({
         {/* Page Content */}
         <div className="p-2 sm:p-3 md:p-4 lg:p-6">
           <MonthYearProvider>
-            {children}
+            <PageTransition>
+              {children}
+            </PageTransition>
           </MonthYearProvider>
         </div>
       </main>

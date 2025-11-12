@@ -1,10 +1,11 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useMemo, useCallback } from "react";
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
-  signOut
+  signOut,
+  Auth
 } from "firebase/auth";
 import { User } from "@/lib/types";
 
@@ -14,6 +15,7 @@ interface SimpleAuthContextType {
   error: string | null;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
+  isAuthenticated: boolean;
 }
 
 const SimpleAuthContext = createContext<SimpleAuthContextType>({
@@ -22,55 +24,32 @@ const SimpleAuthContext = createContext<SimpleAuthContextType>({
   error: null,
   login: async () => ({ success: false }),
   logout: async () => {},
+  isAuthenticated: false,
 });
 
 // Import existing Firebase configuration to avoid multiple initialization
 import { auth as firebaseAuth } from '@/lib/firebase';
 
+// Cache untuk user session
+let cachedUser: User | null = null;
+let isInitialized = false;
+
 export function SimpleAuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(cachedUser);
+  const [loading, setLoading] = useState(!isInitialized);
   const [error, setError] = useState<string | null>(null);
-  const [auth, setAuth] = useState<Auth | null>(null);
+  const [auth] = useState<Auth>(() => firebaseAuth);
 
-  useEffect(() => {
-    try {
-      // Use existing auth instance to avoid multiple initialization
-      setAuth(firebaseAuth);
+  // Memoize auth state to prevent unnecessary re-renders
+  const authState = useMemo(() => ({
+    user,
+    loading,
+    error,
+    isAuthenticated: !!user
+  }), [user, loading, error]);
 
-      // Listen for auth state changes
-      const unsubscribe = onAuthStateChanged(firebaseAuth, (firebaseUser) => {
-        if (firebaseUser) {
-          const user: User = {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email || '',
-            displayName: firebaseUser.displayName || '',
-            photoURL: firebaseUser.photoURL || '',
-            role: 'user',
-            createdAt: new Date(firebaseUser.metadata.creationTime || Date.now()),
-            lastLoginAt: new Date(firebaseUser.metadata.lastSignInTime || Date.now()),
-            isActive: true
-          };
-          setUser(user);
-        } else {
-          setUser(null);
-        }
-
-        setLoading(false);
-        setError(null);
-      });
-
-      return () => {
-        unsubscribe();
-      };
-    } catch (error) {
-      console.error('❌ SimpleAuthProvider error:', error);
-      setError('Failed to setup authentication');
-      setLoading(false);
-    }
-  }, []);
-
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  // Optimized login function
+  const login = useCallback(async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     if (!auth) {
       return { success: false, error: 'Authentication not initialized' };
     }
@@ -88,21 +67,75 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
       setError(errorMessage);
       return { success: false, error: errorMessage };
     }
-  };
+  }, [auth]);
 
-  const logout = async (): Promise<void> => {
+  // Optimized logout function
+  const logout = useCallback(async (): Promise<void> => {
     if (!auth) return;
 
     try {
       await signOut(auth);
+      // Clear cache on logout
+      cachedUser = null;
     } catch (error: unknown) {
       console.error('❌ Logout error:', error);
       setError('Error during logout');
     }
-  };
+  }, [auth]);
+
+  useEffect(() => {
+    // Skip if already initialized
+    if (isInitialized && auth) {
+      return;
+    }
+
+    try {
+      // Listen for auth state changes
+      const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+        if (firebaseUser) {
+          const user: User = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email || '',
+            displayName: firebaseUser.displayName || '',
+            photoURL: firebaseUser.photoURL || '',
+            role: 'user',
+            createdAt: new Date(firebaseUser.metadata.creationTime || Date.now()),
+            lastLoginAt: new Date(firebaseUser.metadata.lastSignInTime || Date.now()),
+            isActive: true
+          };
+
+          // Cache the user
+          cachedUser = user;
+          setUser(user);
+        } else {
+          cachedUser = null;
+          setUser(null);
+        }
+
+        setLoading(false);
+        setError(null);
+        isInitialized = true;
+      });
+
+      return () => {
+        unsubscribe();
+      };
+    } catch (error) {
+      console.error('❌ SimpleAuthProvider error:', error);
+      setError('Failed to setup authentication');
+      setLoading(false);
+    }
+  }, [auth]);
 
   return (
-    <SimpleAuthContext.Provider value={{ user, loading, error, login, logout }}>
+    <SimpleAuthContext.Provider value={{
+      user: authState.user,
+      loading: authState.loading,
+      error: authState.error,
+      login,
+      logout,
+      isAuthenticated: authState.isAuthenticated
+    }}>
       {children}
     </SimpleAuthContext.Provider>
   );

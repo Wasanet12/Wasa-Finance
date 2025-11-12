@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useMonthYear } from '@/contexts/MonthYearContext';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { services } from '@/lib/firestore';
+import { useCustomers, useExpenses } from '@/hooks/useFirestoreCache';
+import { DashboardMetricSkeleton, TableSkeleton } from '@/components/ui/skeleton';
 import { Customer, Expense } from '@/lib/types';
 import { generatePDFReport } from '@/utils/pdfLoader';
 import { toDate } from '@/utils/dateUtils';
@@ -56,31 +57,44 @@ export default function DashboardPage() {
   // Use shared month/year context
   const { selectedMonth, selectedYear, setSelectedMonth, setSelectedYear } = useMonthYear();
 
-  // Add custom scrollbar styles - moved from top-level to useEffect
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const style = document.createElement('style');
-      style.textContent = `
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-      `;
-      document.head.appendChild(style);
+  // Use optimized data fetching with caching
+  const { data: customers, loading: customersLoading, error: customersError } = useCustomers();
+  const { data: expenses, loading: expensesLoading, error: expensesError } = useExpenses();
 
-      // Cleanup on unmount
-      return () => {
-        if (document.head.contains(style)) {
-          document.head.removeChild(style);
-        }
-      };
+  // Memoize loading state
+  const isLoading = useMemo(() => customersLoading || expensesLoading, [customersLoading, expensesLoading]);
+
+  // Memoize error state
+  const hasError = useMemo(() => customersError || expensesError, [customersError, expensesError]);
+
+  // Memoize filtered data
+  const { filteredCustomers, filteredExpenses } = useMemo(() => {
+    if (!customers || !expenses) {
+      return { filteredCustomers: [], filteredExpenses: [] };
     }
-  }, []);
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
+
+    // Filter customers for selected month and year
+    const filteredCustomers = customers.filter(customer => {
+      if (!customer.createdAt) return false;
+
+      const customerDate = toDate(customer.createdAt);
+      if (!customerDate) return false;
+      const matches = customerDate.getMonth() === (selectedMonth - 1) &&
+             customerDate.getFullYear() === selectedYear;
+      return matches;
+    });
+
+    // Filter expenses for selected month and year
+    const filteredExpenses = expenses.filter(expense => {
+      const expenseDate = toDate(expense.date);
+      if (!expenseDate) return false;
+      const matches = expenseDate.getMonth() === (selectedMonth - 1) &&
+             expenseDate.getFullYear() === selectedYear;
+      return matches;
+    });
+
+    return { filteredCustomers, filteredExpenses };
+  }, [customers, expenses, selectedMonth, selectedYear]);
   const [metrics, setMetrics] = useState<DashboardMetrics>({
     totalRevenue: 0,
     totalRevenueBeforeDiscount: 0,

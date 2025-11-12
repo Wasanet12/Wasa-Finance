@@ -1,9 +1,11 @@
 "use client";
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { LoadingSpinner } from '@/components/ui/skeleton';
 import {
   LayoutDashboard,
   Users,
@@ -12,6 +14,7 @@ import {
   LogOut
 } from 'lucide-react';
 import { logout as logOut } from '@/lib/auth';
+import { preloadData } from '@/hooks/useFirestoreCache';
 
 const navigation = [
   {
@@ -57,6 +60,44 @@ interface SidebarProps {
 
 export function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [loadingRoute, setLoadingRoute] = useState<string | null>(null);
+
+  // Preload data for common routes on mount
+  useEffect(() => {
+    // Preload commonly accessed data
+    preloadData(['customers', 'packages', 'expenses']);
+  }, []);
+
+  // Enhanced navigation with prefetching
+  const enhancedNavigation = useMemo(() => navigation.map(item => ({
+    ...item,
+    prefetch: () => {
+      // Prefetch the route
+      router.prefetch(item.href);
+
+      // Prefetch relevant data based on route
+      if (item.href.includes('customers')) {
+        preloadData(['customers']);
+      } else if (item.href.includes('packages')) {
+        preloadData(['packages']);
+      } else if (item.href.includes('expenses')) {
+        preloadData(['expenses']);
+      } else if (item.href === '/dashboard') {
+        preloadData(['customers', 'packages', 'expenses']);
+      }
+    }
+  })), [router]);
+
+  const handleNavigation = (href: string) => {
+    setLoadingRoute(href);
+    router.push(href);
+
+    // Reset loading state after a delay
+    setTimeout(() => {
+      setLoadingRoute(null);
+    }, 300);
+  };
 
   const handleLogout = async () => {
     try {
@@ -93,23 +134,31 @@ export function Sidebar({ className }: SidebarProps) {
 
         <div className="px-2 sm:px-4">
           <div className="space-y-1">
-            {navigation.map((item) => {
+            {enhancedNavigation.map((item) => {
               const isActive = pathname === item.href;
+              const isLoading = loadingRoute === item.href;
+
               return (
                 <Button
                   key={item.name}
                   className={cn(
-                    "w-full justify-start h-10 sm:h-11 px-3 sm:px-4 rounded-lg transition-all duration-200",
+                    "w-full justify-start h-10 sm:h-11 px-3 sm:px-4 rounded-lg transition-all duration-200 relative",
                     isActive
                       ? "bg-white text-[#1B2336] shadow-sm font-semibold"
-                      : "custom-btn"
+                      : "custom-btn",
+                    isLoading && "opacity-80"
                   )}
-                  asChild
+                  onClick={() => handleNavigation(item.href)}
+                  onMouseEnter={() => item.prefetch()}
+                  disabled={isLoading}
                 >
-                  <Link href={item.href} className="group">
-                    <item.icon className="mr-3 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-200" />
-                    <span className="font-medium text-sm sm:text-base truncate">{item.name}</span>
-                  </Link>
+                  <item.icon className="mr-3 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-200" />
+                  <span className="font-medium text-sm sm:text-base truncate">
+                    {item.name}
+                  </span>
+                  {isLoading && (
+                    <LoadingSpinner size="sm" className="ml-auto" />
+                  )}
                 </Button>
               );
             })}
