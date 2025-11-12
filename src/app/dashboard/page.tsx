@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useMonthYear } from '@/contexts/MonthYearContext';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -143,15 +143,39 @@ export default function DashboardPage() {
     setSelectedMonth(newMonth);
   };
 
+  // Initialize metrics and update when filtered data changes
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (filteredCustomers.length > 0 || filteredExpenses.length > 0) {
+      const calculatedMetrics = calculateMetrics();
+      setMetrics(calculatedMetrics);
+    } else {
+      // Set empty metrics when no data
+      setMetrics({
+        totalRevenue: 0,
+        totalRevenueBeforeDiscount: 0,
+        wasaProfit: 0,
+        wasaProfitBeforeDiscount: 0,
+        officeProfit: 0,
+        totalExpenses: 0,
+        wasaNetProfit: 0,
+        wasaNetProfitBeforeDiscount: 0,
+        totalDiscount: 0,
+        customersPayToWasa: 0,
+        customersPayToOffice: 0,
+        totalPaymentToWasa: 0,
+        totalPaymentToOffice: 0,
+        customerCounts: {
+          total: 0,
+          active: 0,
+          inactive: 0,
+          paid: 0,
+          unpaid: 0
+        }
+      });
+    }
+  }, [filteredCustomers, filteredExpenses, selectedMonth, selectedYear, calculateMetrics]);
 
-  useEffect(() => {
-    calculateMetrics();
-  }, [customers, expenses, selectedMonth, selectedYear]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const calculateComparisonMetrics = (currentMetrics: DashboardMetrics) => {
+  const calculateComparisonMetrics = useCallback((currentMetrics: DashboardMetrics) => {
     // Calculate comparison metrics for the selected month
 
     // Calculate previous month and year
@@ -164,18 +188,18 @@ export default function DashboardPage() {
     }
 
     // Filter data for previous month
-    const prevMonthCustomers = customers.filter(customer => {
+    const prevMonthCustomers = customers?.filter(customer => {
       if (!customer.createdAt) return false;
       const customerDate = toDate(customer.createdAt);
       if (!customerDate) return false;
       return customerDate.getMonth() === (prevMonth - 1) && customerDate.getFullYear() === prevYear;
-    });
+    }) || [];
 
-    const prevMonthExpenses = expenses.filter(expense => {
+    const prevMonthExpenses = expenses?.filter(expense => {
       const expenseDate = toDate(expense.date);
       if (!expenseDate) return false;
       return expenseDate.getMonth() === (prevMonth - 1) && expenseDate.getFullYear() === prevYear;
-    });
+    }) || [];
 
     // Calculate previous month metrics
     const prevRevenue = prevMonthCustomers.reduce((sum, customer) => {
@@ -213,34 +237,11 @@ export default function DashboardPage() {
       profitChange,
       profitChangePercent,
     });
-  };
-
-  const fetchData = async () => {
-    try {
-      const [customersResponse, expensesResponse] = await Promise.all([
-        services.customer.getAll(),
-        services.expense.getAll()
-      ]);
-
-      if (customersResponse.success && customersResponse.data) {
-        setCustomers(customersResponse.data);
-      } else {
-        setCustomers([]);
-      }
-
-      if (expensesResponse.success && expensesResponse.data) {
-        setExpenses(expensesResponse.data);
-      } else {
-        setExpenses([]);
-      }
-    } catch {
-      setCustomers([]);
-      setExpenses([]);
-    }
-  };
+  }, [customers, expenses, selectedMonth, selectedYear]);
 
   
-  const calculateMetrics = () => {
+  
+  const calculateMetrics = useCallback(() => {
     // If no data, return zeros
     if (!filteredCustomers.length && !filteredExpenses.length) {
       return {
@@ -365,7 +366,7 @@ export default function DashboardPage() {
 
     setMetrics(finalMetrics);
     calculateComparisonMetrics(finalMetrics);
-  };
+  }, [filteredCustomers, filteredExpenses, calculateComparisonMetrics]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
