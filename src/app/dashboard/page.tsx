@@ -143,38 +143,6 @@ export default function DashboardPage() {
     setSelectedMonth(newMonth);
   };
 
-  // Initialize metrics and update when filtered data changes
-  useEffect(() => {
-    if (filteredCustomers.length > 0 || filteredExpenses.length > 0) {
-      const calculatedMetrics = calculateMetrics();
-      setMetrics(calculatedMetrics);
-    } else {
-      // Set empty metrics when no data
-      setMetrics({
-        totalRevenue: 0,
-        totalRevenueBeforeDiscount: 0,
-        wasaProfit: 0,
-        wasaProfitBeforeDiscount: 0,
-        officeProfit: 0,
-        totalExpenses: 0,
-        wasaNetProfit: 0,
-        wasaNetProfitBeforeDiscount: 0,
-        totalDiscount: 0,
-        customersPayToWasa: 0,
-        customersPayToOffice: 0,
-        totalPaymentToWasa: 0,
-        totalPaymentToOffice: 0,
-        customerCounts: {
-          total: 0,
-          active: 0,
-          inactive: 0,
-          paid: 0,
-          unpaid: 0
-        }
-      });
-    }
-  }, [filteredCustomers, filteredExpenses, selectedMonth, selectedYear, calculateMetrics]);
-
   const calculateComparisonMetrics = useCallback((currentMetrics: DashboardMetrics) => {
     // Calculate comparison metrics for the selected month
 
@@ -451,6 +419,38 @@ export default function DashboardPage() {
       alert('Gagal menghasilkan PDF. Silakan coba lagi.');
     }
   };
+
+  // Initialize metrics and update when filtered data changes
+  useEffect(() => {
+    if (filteredCustomers.length > 0 || filteredExpenses.length > 0) {
+      const calculatedMetrics = calculateMetrics();
+      setMetrics(calculatedMetrics);
+    } else {
+      // Set empty metrics when no data
+      setMetrics({
+        totalRevenue: 0,
+        totalRevenueBeforeDiscount: 0,
+        wasaProfit: 0,
+        wasaProfitBeforeDiscount: 0,
+        officeProfit: 0,
+        totalExpenses: 0,
+        wasaNetProfit: 0,
+        wasaNetProfitBeforeDiscount: 0,
+        totalDiscount: 0,
+        customersPayToWasa: 0,
+        customersPayToOffice: 0,
+        totalPaymentToWasa: 0,
+        totalPaymentToOffice: 0,
+        customerCounts: {
+          total: 0,
+          active: 0,
+          inactive: 0,
+          paid: 0,
+          unpaid: 0
+        }
+      });
+    }
+  }, [filteredCustomers, filteredExpenses, selectedMonth, selectedYear, calculateMetrics]);
 
   // Show loading state while fetching data
   if (isLoading) {
